@@ -10,6 +10,7 @@ import { useLogout, useSession } from '../model/use-session'
 /** Secciones según el rol. */
 const TEAM_LINKS: { to: string; label: string; role: Role }[] = [
   { to: '/mis-envios', label: 'Mis envíos', role: 'USUARIO' },
+  { to: '/asesor', label: 'Módulo Asesor', role: 'ASESOR' },
   { to: '/admin', label: 'Inteligencia de negocio', role: 'ADMIN' },
   { to: '/admin/tarifas', label: 'Tarifas', role: 'ADMIN' },
 ]

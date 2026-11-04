@@ -5,7 +5,8 @@ import { httpClient, type CallOptions } from '@/shared/api'
  * Login con correo y contraseña (backend 1.3.0, CR-001). La sesión va en una cookie httpOnly,
  * así que el front nunca guarda tokens.
  */
-export const ROLES = ['USUARIO', 'ENCARGADO', 'ADMIN'] as const
+/** `ASESOR`: personal interno del CRM (CR-007 del backend, por confirmar). */
+export const ROLES = ['USUARIO', 'ENCARGADO', 'ADMIN', 'ASESOR'] as const
 export type Role = (typeof ROLES)[number]
 
 export const sessionUserSchema = z.object({

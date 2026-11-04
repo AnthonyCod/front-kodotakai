@@ -1,4 +1,4 @@
-import { useState, type ComponentType, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import {
   Bell,
@@ -9,6 +9,7 @@ import {
   FileText,
   LayoutGrid,
   ListChecks,
+  LogOut,
   ChartColumn,
   Search,
   Truck,
@@ -17,6 +18,7 @@ import {
   type LucideProps,
 } from 'lucide-react'
 import { cn } from 'cn'
+import { useLogout, useSession } from '@/features/auth'
 import { updateAdvisorStatus, type AdvisorStatus, type FunnelId } from '../api/crm-api'
 import { initials } from '../model/contact'
 import { FUNNELS, FUNNEL_IDS } from '../model/funnels'
@@ -178,13 +180,77 @@ function Bell_() {
   )
 }
 
+/** Avatar con la cuenta de la sesión y «Cerrar sesión». */
+function AccountMenu({ up, children }: { up?: boolean; children: ReactNode }) {
+  const { user } = useSession()
+  const logout = useLogout()
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const onPointer = (e: PointerEvent) =>
+      !ref.current?.contains(e.target as Node) && setOpen(false)
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
+    window.addEventListener('pointerdown', onPointer)
+    window.addEventListener('keydown', onKey)
+    return () => {
+      window.removeEventListener('pointerdown', onPointer)
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label="Mi cuenta"
+        onClick={() => setOpen((v) => !v)}
+        className="block rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/40"
+      >
+        {children}
+      </button>
+      {open && (
+        <div
+          role="menu"
+          className={cn(
+            'absolute left-0 z-50 w-60 rounded-xl border bg-card p-1.5 shadow-lg',
+            up ? 'bottom-full mb-2' : 'top-full mt-2',
+          )}
+        >
+          {user && (
+            <div className="px-3 py-2">
+              <p className="truncate text-sm font-semibold">{user.nombre}</p>
+              <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+            </div>
+          )}
+          <button
+            type="button"
+            role="menuitem"
+            disabled={logout.isPending}
+            onClick={() => logout.mutate()}
+            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/5"
+          >
+            <LogOut className="size-4" {...ICON} />
+            Cerrar sesión
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // --- Móvil ---
 
 function MobileTopBar({ onSearch }: { onSearch: () => void }) {
   const advisor = useAdvisor()
   return (
     <header className="flex h-[60px] shrink-0 items-center gap-3 border-b bg-card px-4 lg:hidden">
-      <Avatar />
+      <AccountMenu>
+        <Avatar />
+      </AccountMenu>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold">{advisor.data?.nombre ?? 'Asesor'}</p>
         <StatusSelect />
@@ -379,7 +445,9 @@ function Sidebar() {
         ))}
       </nav>
       <div className="flex items-center gap-3 border-t px-4 py-4">
-        <Avatar size="sm" />
+        <AccountMenu up>
+          <Avatar size="sm" />
+        </AccountMenu>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold">{advisor.data?.nombre ?? 'Asesor'}</p>
           <StatusSelect />

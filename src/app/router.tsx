@@ -62,10 +62,14 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    // Módulo Asesor (CRM con 3 embudos). Sin protección por rol todavía: el rol ASESOR y su login
-    // (StaffToken, CR-007 del backend) están por confirmar.
+    // Módulo Asesor (CRM con 3 embudos). Rol ASESOR; el login real del personal (CR-007) está por
+    // confirmar con el backend.
     path: '/asesor',
-    element: <AdvisorShell />,
+    element: (
+      <RequireRole role="ASESOR">
+        <AdvisorShell />
+      </RequireRole>
+    ),
     children: [
       { index: true, element: <AdvisorDashboardPage /> },
       { path: 'embudos', element: <Navigate to="ventas" replace /> },
