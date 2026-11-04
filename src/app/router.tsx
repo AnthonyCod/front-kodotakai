@@ -1,4 +1,9 @@
 import { createBrowserRouter, Navigate } from 'react-router'
+import { AdvisorShell } from '@/features/advisor-crm'
+import { AdvisorDashboardPage } from '@/pages/advisor-dashboard-page'
+import { AdvisorFunnelPage } from '@/pages/advisor-funnel-page'
+import { AdvisorTasksPage } from '@/pages/advisor-tasks-page'
+import { AdvisorToolsPage } from '@/pages/advisor-tools-page'
 import { AdminInsightsPage } from '@/pages/admin-insights-page'
 import { AgentInboxPage } from '@/pages/agent-inbox-page'
 import { ChannelSimulatorPage } from '@/pages/channel-simulator-page'
@@ -43,7 +48,18 @@ export const router = createBrowserRouter([
       { path: 'metricas', element: <MetricsPage /> },
     ],
   },
-  { path: '/asesor', element: <Navigate to="/interno/asesor" replace /> },
+  {
+    // Módulo Asesor (CRM con 3 embudos). Sin login todavía: falta auth con rol asesor en el backend.
+    path: '/asesor',
+    element: <AdvisorShell />,
+    children: [
+      { index: true, element: <AdvisorDashboardPage /> },
+      { path: 'embudos', element: <Navigate to="ventas" replace /> },
+      { path: 'embudos/:embudo', element: <AdvisorFunnelPage /> },
+      { path: 'consulta', element: <AdvisorToolsPage /> },
+      { path: 'tareas', element: <AdvisorTasksPage /> },
+    ],
+  },
   { path: '/metricas', element: <Navigate to="/interno/metricas" replace /> },
   { path: '*', element: <Navigate to="/" replace /> },
 ])
