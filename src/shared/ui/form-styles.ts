@@ -1,3 +1,5 @@
+import { GLASS_TINT } from './glass'
+
 // Clases comunes de los formularios de Consultas (rastrear, cotizar, PQRS).
 
 /** Campo de texto. Con error (`aria-invalid` o validación nativa tras tocarlo) se ve en rojo. */
@@ -6,8 +8,8 @@ export const FIELD =
 
 export const FIELD_LABEL = 'block text-xs font-medium text-muted-foreground'
 
-export const PRIMARY_BUTTON =
-  'rounded-xl bg-brand-deep px-4 py-2.5 text-sm font-medium text-brand-foreground transition hover:bg-brand-deep/90 active:scale-[0.98] disabled:opacity-50'
+/** Acción principal de un formulario: vidrio azul Logi en píldora (como todos los botones). */
+export const PRIMARY_BUTTON = `${GLASS_TINT} rounded-full px-5 py-2.5 text-sm font-medium`
 
 /** Lo que cada consulta reporta al historial de la sesión. */
 export interface ResultSummary {

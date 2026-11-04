@@ -1,5 +1,6 @@
 import { http, HttpResponse, type RequestHandler } from 'msw'
 import { chatFixtures, pickScenario } from './scenarios/chat-scenarios'
+import { shipmentBatchHandlers } from './shipment-batches'
 
 // Rutas relativas a VITE_API_URL (/api/v1). Respuestas: capturas reales del backend.
 const api = (path: string) => `*/api/v1${path}`
@@ -156,4 +157,6 @@ export const handlers: RequestHandler[] = [
       formula_version: 'provisional-v1',
     })
   }),
+
+  ...shipmentBatchHandlers,
 ]

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 're
 import { Link } from 'react-router'
 import { Mic, PhoneOff, Plus, Search, Square, Trash2, Volume2, VolumeX } from 'lucide-react'
 import { cn } from 'cn'
-import logiUrl from '@/assets/logi.jpg'
+import logiUrl from '@/assets/logi.webp'
 import { BlockActionsProvider, BlockRenderer, type BlockActions } from '@/shared/blocks'
 import { MessageCircle } from '@/shared/components/animate-ui/icons/hugeicons/message-circle'
 import { PhoneCall } from '@/shared/components/animate-ui/icons/hugeicons/phone-call'

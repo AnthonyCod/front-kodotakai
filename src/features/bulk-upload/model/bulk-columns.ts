@@ -1,7 +1,8 @@
 /**
- * Columnas de la plantilla de carga masiva, en orden. `key` es el campo del JSON del lote.
- * (por confirmar) Los datos del paquete son los de `CotizacionRequest`; `referencia_cliente` y el
- * destinatario los propone el frontend hasta que el backend defina su endpoint de lotes.
+ * Columnas de la plantilla de carga masiva, en orden. `key` es el campo del envío en
+ * `POST /shipment-batches` (`destinatario_*` va anidado en `destinatario`). El paquete usa los campos
+ * de `CotizacionRequest`. Documento y email del destinatario (opcionales en el backend) no están
+ * en la plantilla.
  */
 export const BULK_COLUMNS = [
   {
@@ -69,5 +70,5 @@ export const BULK_COLUMNS = [
 
 export type BulkColumnKey = (typeof BULK_COLUMNS)[number]['key']
 
-/** Límite por archivo para revisar en el navegador sin trabarlo. (por confirmar con backend) */
+/** Envíos por archivo: el `BATCH_MAX_ITEMS` por defecto del backend (configurable allá). */
 export const MAX_ROWS = 500

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'rea
 import { Link } from 'react-router'
 import { PackagePlus } from 'lucide-react'
 import { cn } from 'cn'
-import logiUrl from '@/assets/logi.jpg'
+import logiUrl from '@/assets/logi.webp'
 import { formatCop } from '@/shared/lib/format'
 import { BlockCard, BlockHeader } from '@/shared/ui/block-card'
 import { Autocomplete } from '@/shared/ui/autocomplete'
@@ -80,7 +80,7 @@ export function ShipmentChat() {
   const data = mutation.data
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-5xl flex-col gap-3 px-3 pt-3 pb-3 sm:px-6 sm:pt-6 sm:pb-5">
+    <div className="mx-auto flex h-full w-full max-w-5xl flex-col gap-3 px-4 pt-3 pb-3 sm:px-6 sm:pt-6 sm:pb-5">
       <div
         className="min-h-0 flex-1 space-y-5 overflow-y-auto pr-1 sm:space-y-7"
         aria-live="polite"

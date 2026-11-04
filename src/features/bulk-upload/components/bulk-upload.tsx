@@ -1,13 +1,26 @@
-import { useState, type DragEvent, type ReactNode } from 'react'
-import { ChevronDown, CircleAlert, FileDown, FileSpreadsheet, FileUp } from 'lucide-react'
+import { useState, type DragEvent, type FormEvent, type ReactNode } from 'react'
+import { useMutation } from '@tanstack/react-query'
+import { AnimateIcon } from '@animate-ui/react/icons'
+import { Braces, ChevronDown, CircleAlert, FileDown, FileSpreadsheet } from 'lucide-react'
 import { cn } from 'cn'
+import { toApiError } from '@/shared/api'
+import { env } from '@/shared/config/env'
 import { formatCop } from '@/shared/lib/format'
-import { StatusDot } from '@/shared/ui/block-card'
+import { Badge, BadgeDot } from '@/shared/ui/badge'
+import { Download01 } from '@/shared/components/animate-ui/icons/hugeicons/download-01'
+import { Sparkles } from '@/shared/components/animate-ui/icons/hugeicons/sparkles'
+import { Upload01 } from '@/shared/components/animate-ui/icons/hugeicons/upload-01'
 import { FIELD, FIELD_LABEL, PRIMARY_BUTTON } from '@/shared/ui/form-styles'
 import { GLASS } from '@/shared/ui/glass'
+import { PAGE_SUBTITLE, PAGE_TITLE, SURFACE } from '@/shared/ui/page'
+import { Reveal } from '@/shared/ui/reveal'
+import { createShipmentBatch, fetchBatchItems, type BatchItem } from '../api/batches-api'
+import { batchErrorText, suggestBatchRef, summarizeBatch } from '../model/batch-result'
 import { BULK_COLUMNS, MAX_ROWS, type BulkColumnKey } from '../model/bulk-columns'
-import { buildBatch, parseBulkSheet, type BulkRow } from '../model/bulk-rows'
+import { buildBatch, parseBulkSheet, sendableRows, type BulkRow } from '../model/bulk-rows'
 import { downloadTemplate } from '../model/template'
+import { BatchResult } from './batch-result'
+import { FilterTabs } from './filter-tabs'
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024
 /** Tarjetas que se pintan de una vez; el resto con "Mostrar más". */
@@ -43,11 +56,31 @@ const EXAMPLE_JSON = JSON.stringify(
   2,
 )
 
+const BATCHES_URL = `${env.apiUrl}/shipment-batches`
+const INTEGRATION_REQUEST = [
+  `POST ${BATCHES_URL}`,
+  'Authorization: Bearer <tu API key>',
+  'Idempotency-Key: PEDIDOS-NOV-04',
+  'Content-Type: application/json',
+].join('\n')
+
+/** Opción de la zona de carga: recuadro con contorno, icono arriba, título y texto (como una hoja de «agregar»). */
+const UPLOAD_TILE =
+  'flex h-full cursor-pointer flex-col items-center justify-start gap-2 rounded-3xl border-[1.5px] border-foreground/70 bg-card px-3 py-5 text-center transition hover:bg-muted/40 active:scale-[0.98] sm:px-5 sm:py-6'
+
 type Filter = 'all' | 'errors'
 
+/** Lote enviado: el id para volver a consultarlo y las filas que salieron, en orden. */
+interface SentBatch {
+  batchId: string
+  rows: BulkRow[]
+  items: BatchItem[]
+}
+
 /**
- * Carga masiva: plantilla → archivo → revisión fila por fila → lote JSON.
- * Todo ocurre en el navegador; (por confirmar) el envío al backend espera su endpoint de lotes.
+ * Carga masiva: plantilla → archivo → revisión fila por fila → `POST /shipment-batches`.
+ * El Excel se lee y valida en el navegador; el backend crea cada envío por separado y responde cuál
+ * se creó (con su guía) y cuál no. La API key solo vive en memoria: no se guarda ni se registra.
  */
 export function BulkUpload() {
   const [fileName, setFileName] = useState<string | null>(null)
@@ -58,6 +91,24 @@ export function BulkUpload() {
   const [filter, setFilter] = useState<Filter>('all')
   const [visible, setVisible] = useState(PAGE)
   const [batchRef, setBatchRef] = useState('')
+  const [apiKey, setApiKey] = useState('')
+  const [sent, setSent] = useState<SentBatch | null>(null)
+
+  const create = useMutation({
+    mutationFn: async ({ key, reference }: { key: string; reference: string }) => {
+      const outgoing = sendableRows(rows)
+      const { batch_id } = await createShipmentBatch(key, buildBatch(reference, outgoing))
+      return { batchId: batch_id, rows: outgoing, items: await fetchBatchItems(key, batch_id) }
+    },
+    onSuccess: setSent,
+  })
+  // «En proceso» (otra petición del mismo lote sigue viva): se vuelve a pedir el detalle.
+  const refresh = useMutation({
+    mutationFn: (batch: SentBatch) => fetchBatchItems(apiKey.trim(), batch.batchId),
+    onSuccess: (items) => setSent((current) => current && { ...current, items }),
+  })
+  const summary = sent && summarizeBatch(sent.items, sent.rows)
+  const error = create.error ?? refresh.error
 
   const valid = rows.filter((row) => row.shipment).length
   const withErrors = rows.length - valid
@@ -67,6 +118,7 @@ export function BulkUpload() {
     if (!file) return
     setFileError(null)
     setRows([])
+    resetBatch()
     setFileName(file.name)
     if (!file.name.toLowerCase().endsWith('.xlsx'))
       return setFileError('El archivo debe ser de Excel (.xlsx). Usa la plantilla.')
@@ -79,11 +131,23 @@ export function BulkUpload() {
       setRows(result.rows)
       setFilter(result.rows.some((row) => !row.shipment) ? 'errors' : 'all')
       setVisible(PAGE)
+      setBatchRef((current) => current || suggestBatchRef(new Date()))
     } catch {
       setFileError('No pudimos leer el archivo. Revisa que sea la plantilla en formato .xlsx.')
     } finally {
       setReading(false)
     }
+  }
+
+  function resetBatch() {
+    setSent(null)
+    create.reset()
+    refresh.reset()
+  }
+
+  function submit(event: FormEvent) {
+    event.preventDefault()
+    create.mutate({ key: apiKey.trim(), reference: batchRef.trim() })
   }
 
   function onDrop(event: DragEvent) {
@@ -106,103 +170,157 @@ export function BulkUpload() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-5 px-3 py-3 sm:space-y-6 sm:px-6 sm:py-6">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-medium sm:text-3xl">Carga masiva</h1>
-        <p className="text-sm text-muted-foreground sm:text-base">
-          Crea muchos envíos a la vez desde un archivo de Excel.
-        </p>
-      </header>
+    <div className="mx-auto w-full max-w-3xl space-y-5 px-4 py-3 sm:space-y-6 sm:px-6 sm:py-6">
+      <Reveal as="header" className="space-y-1">
+        <h1 className={PAGE_TITLE}>Carga masiva</h1>
+        <p className={PAGE_SUBTITLE}>Crea muchos envíos a la vez desde un archivo de Excel.</p>
+      </Reveal>
 
-      <Step number={1} title="Descarga la plantilla">
-        <p className="text-sm text-muted-foreground">
-          Una fila por envío. En la hoja «Instrucciones» está qué va en cada columna.
-        </p>
-        <button
-          type="button"
-          onClick={() => void downloadTemplate()}
-          className={`${GLASS} rounded-full px-4 py-2 text-sm font-medium`}
-        >
-          <FileDown size={16} aria-hidden /> Descargar plantilla (.xlsx)
-        </button>
-      </Step>
-
-      <Step number={2} title="Sube tu archivo">
-        <label
-          onDragOver={(event) => {
-            event.preventDefault()
-            setDragging(true)
-          }}
-          onDragLeave={() => setDragging(false)}
-          onDrop={onDrop}
-          className={cn(
-            'flex cursor-pointer flex-col items-center gap-2 rounded-2xl border-2 border-dashed px-4 py-7 text-center transition',
-            dragging ? 'border-brand bg-brand/5' : 'hover:bg-muted/50',
-            fileError && 'border-destructive/50 bg-destructive/5',
-          )}
-        >
-          <span className="grid size-11 place-items-center rounded-full bg-muted text-foreground/70">
-            {fileName && !fileError ? (
-              <FileSpreadsheet size={20} aria-hidden />
-            ) : (
-              <FileUp size={20} aria-hidden />
-            )}
+      {/* Agregar envíos: dos opciones (subir el Excel o bajar la plantilla) y, abajo, la API. */}
+      <Reveal as="section" className={cn(SURFACE, 'space-y-5 p-5 text-center sm:p-7')}>
+        <div aria-hidden className="relative mx-auto h-24 w-36">
+          <span className="absolute top-5 left-6 h-16 w-14 -rotate-12 rounded-2xl bg-primary/20" />
+          <span className="absolute top-4 right-6 h-16 w-14 rotate-12 rounded-2xl bg-brand/25" />
+          <span className="absolute top-1 left-1/2 grid h-[4.75rem] w-16 -translate-x-1/2 place-items-center rounded-2xl bg-card shadow-[0_2px_6px_rgb(15_23_42/0.08),0_12px_28px_rgb(15_23_42/0.14)]">
+            <FileSpreadsheet className="size-8 text-success" />
           </span>
-          <span className="text-[15px] font-medium">
-            {reading ? 'Leyendo…' : (fileName ?? 'Toca para elegir tu Excel')}
-          </span>
-          <span className="text-xs text-muted-foreground">
-            {fileName ? 'Toca para cambiar el archivo' : 'o arrástralo aquí'} · .xlsx · máximo{' '}
-            {MAX_ROWS} envíos
-          </span>
-          <input
-            type="file"
-            accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            className="sr-only"
-            onChange={(event) => {
-              void load(event.target.files?.[0])
-              event.target.value = ''
-            }}
+          <Sparkles
+            size={20}
+            animateOnView
+            animateOnViewOnce
+            className="absolute top-0 right-3 text-warning"
           />
-        </label>
+          <Sparkles
+            size={14}
+            animateOnView
+            animateOnViewOnce
+            className="absolute bottom-2 left-4 text-brand"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <h2 className="text-lg font-semibold tracking-tight sm:text-xl">Agrega tus envíos</h2>
+          <p className="mx-auto max-w-md text-sm text-muted-foreground">
+            Una fila por envío. En la hoja «Instrucciones» de la plantilla está qué va en cada
+            columna.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          <AnimateIcon animateOnHover asChild>
+            <label
+              onDragOver={(event) => {
+                event.preventDefault()
+                setDragging(true)
+              }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={onDrop}
+              className={cn(
+                UPLOAD_TILE,
+                dragging && 'border-brand bg-brand/5',
+                fileError && 'border-destructive/60 bg-destructive/5',
+                fileName && !fileError && 'border-success/70 bg-success/5',
+              )}
+            >
+              <span
+                className={cn(
+                  'grid size-12 place-items-center rounded-2xl',
+                  fileName && !fileError
+                    ? 'bg-success/10 text-success'
+                    : 'bg-brand/10 text-brand-deep',
+                )}
+              >
+                {fileName && !fileError ? (
+                  <FileSpreadsheet size={22} aria-hidden />
+                ) : (
+                  <Upload01 size={22} aria-hidden />
+                )}
+              </span>
+              <span className="text-[15px] font-semibold sm:text-base">
+                {reading ? 'Leyendo…' : fileName ? 'Archivo listo' : 'Sube tu Excel'}
+              </span>
+              <span className="line-clamp-3 text-xs leading-snug text-muted-foreground sm:text-sm">
+                {fileName
+                  ? `${fileName} · toca para cambiarlo`
+                  : `Toca o arrastra tu .xlsx aquí. Máximo ${MAX_ROWS} envíos.`}
+              </span>
+              <input
+                type="file"
+                accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                className="sr-only"
+                onChange={(event) => {
+                  void load(event.target.files?.[0])
+                  event.target.value = ''
+                }}
+              />
+            </label>
+          </AnimateIcon>
+          <AnimateIcon animateOnHover asChild>
+            <button type="button" onClick={() => void downloadTemplate()} className={UPLOAD_TILE}>
+              <span className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary">
+                <Download01 size={22} aria-hidden />
+              </span>
+              <span className="text-[15px] font-semibold sm:text-base">Descarga la plantilla</span>
+              <span className="line-clamp-3 text-xs leading-snug text-muted-foreground sm:text-sm">
+                El archivo .xlsx con las columnas listas para llenar.
+              </span>
+            </button>
+          </AnimateIcon>
+        </div>
+
         {fileError && (
           <p
             role="alert"
-            className="flex gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
+            className="flex gap-2 rounded-xl bg-destructive/5 p-3 text-left text-sm text-destructive"
           >
             <CircleAlert size={16} aria-hidden className="mt-0.5 shrink-0" />
             {fileError}
           </p>
         )}
-      </Step>
+
+        <div className="flex items-center gap-3 text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
+          <span className="h-px flex-1 bg-border" />
+          O desde tu sistema
+          <span className="h-px flex-1 bg-border" />
+        </div>
+        <p className="flex items-center justify-center gap-2.5 text-left text-sm text-foreground/80 sm:text-center">
+          <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-muted text-foreground/70">
+            <Braces size={15} aria-hidden />
+          </span>
+          <span>
+            Tu sistema puede crear los envíos con{' '}
+            <a href="#integracion" className="font-medium text-brand-deep hover:underline">
+              nuestra API de lotes
+            </a>
+            , con los mismos campos de la plantilla.
+          </span>
+        </p>
+      </Reveal>
 
       {rows.length > 0 && (
-        <Step number={3} title="Revisa los envíos">
+        <Step number={1} title="Revisa los envíos">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
             <span>{rows.length} filas</span>
-            <StatusDot tone="ok">{valid} listas</StatusDot>
-            {withErrors > 0 && <StatusDot tone="alert">{withErrors} con error</StatusDot>}
+            <Badge variant="success">
+              <BadgeDot />
+              {valid} listas
+            </Badge>
+            {withErrors > 0 && (
+              <Badge variant="destructive">
+                <BadgeDot />
+                {withErrors} con error
+              </Badge>
+            )}
           </div>
 
           {withErrors > 0 && (
-            <div className="grid w-full grid-cols-2 gap-1 rounded-2xl bg-muted p-1 sm:w-80">
-              {(
-                [
-                  ['errors', 'Con error'],
-                  ['all', 'Todas'],
-                ] as const
-              ).map(([value, label]) => (
-                <button
-                  key={value}
-                  type="button"
-                  aria-pressed={filter === value}
-                  onClick={() => setFilter(value)}
-                  className="rounded-xl px-2 py-1.5 text-sm text-muted-foreground transition aria-pressed:bg-card aria-pressed:font-medium aria-pressed:text-foreground aria-pressed:shadow-card"
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+            <FilterTabs
+              value={filter}
+              onChange={setFilter}
+              options={[
+                ['errors', 'Con error', withErrors],
+                ['all', 'Todas', rows.length],
+              ]}
+            />
           )}
 
           <ul className="space-y-2">
@@ -229,39 +347,97 @@ export function BulkUpload() {
       )}
 
       {valid > 0 && (
-        <Step number={4} title="Crea los envíos">
-          <label className="block space-y-1">
-            <span className={FIELD_LABEL}>Referencia del lote (opcional)</span>
-            <input
-              value={batchRef}
-              maxLength={40}
-              placeholder="Ej.: PEDIDOS-NOV-04"
-              onChange={(event) => setBatchRef(event.target.value)}
-              className={FIELD}
-            />
-          </label>
-          <div className="grid gap-2 sm:grid-cols-2">
-            <button type="button" disabled className={cn(PRIMARY_BUTTON, 'py-3')}>
-              Crear {valid} envío{valid === 1 ? '' : 's'}
-            </button>
-            <button
-              type="button"
-              onClick={downloadJson}
-              className={`${GLASS} rounded-xl px-4 py-3 text-sm font-medium`}
-            >
-              <FileDown size={16} aria-hidden /> Descargar JSON
-            </button>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Crear envíos se activará cuando el servicio de lotes esté listo (por confirmar).
-            Mientras tanto puedes descargar el lote en JSON.
-          </p>
+        <Step number={2} title="Crea los envíos">
+          <form onSubmit={submit} className="space-y-3">
+            <label className="block space-y-1">
+              <span className={FIELD_LABEL}>API key de tu empresa</span>
+              <input
+                type="password"
+                required
+                value={apiKey}
+                autoComplete="off"
+                spellCheck={false}
+                onChange={(event) => setApiKey(event.target.value)}
+                className={FIELD}
+              />
+              <span className="block text-xs text-muted-foreground">
+                Te la entrega TransLogix. Solo se usa para este envío: no se guarda.
+              </span>
+            </label>
+            <label className="block space-y-1">
+              <span className={FIELD_LABEL}>Referencia del lote</span>
+              <input
+                required
+                value={batchRef}
+                maxLength={40}
+                placeholder="Ej.: PEDIDOS-NOV-04"
+                onChange={(event) => {
+                  setBatchRef(event.target.value)
+                  resetBatch()
+                }}
+                className={FIELD}
+              />
+              <span className="block text-xs text-muted-foreground">
+                Si envías otra vez el mismo archivo con la misma referencia, no se duplican envíos.
+              </span>
+            </label>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <button
+                type="submit"
+                disabled={create.isPending || sent !== null}
+                className={cn(PRIMARY_BUTTON, 'py-3')}
+              >
+                {create.isPending
+                  ? 'Creando envíos…'
+                  : sent
+                    ? 'Lote enviado'
+                    : `Crear ${valid} envío${valid === 1 ? '' : 's'}`}
+              </button>
+              <button
+                type="button"
+                onClick={downloadJson}
+                className={`${GLASS} rounded-full px-4 py-3 text-sm font-medium`}
+              >
+                <FileDown size={16} aria-hidden /> Descargar JSON
+              </button>
+            </div>
+            {create.isPending && valid > 100 && (
+              <p className="text-xs text-muted-foreground">
+                Un lote grande puede tardar hasta un par de minutos. No cierres esta pantalla.
+              </p>
+            )}
+            {error && (
+              <p
+                role="alert"
+                className="flex gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
+              >
+                <CircleAlert size={16} aria-hidden className="mt-0.5 shrink-0" />
+                {batchErrorText(toApiError(error))}
+              </p>
+            )}
+          </form>
         </Step>
       )}
 
-      <details className="group rounded-[1.25rem] bg-muted/70 px-4">
+      {sent && summary && (
+        <Step number={3} title="Resultado del lote">
+          <BatchResult
+            key={sent.batchId}
+            summary={summary}
+            refreshing={refresh.isPending}
+            onRefresh={() => refresh.mutate(sent)}
+          />
+        </Step>
+      )}
+
+      <details id="integracion" className={cn(SURFACE, 'group scroll-mt-4 px-4')}>
         <summary className="flex cursor-pointer list-none items-center justify-between gap-3 py-4 text-[15px] font-medium [&::-webkit-details-marker]:hidden">
-          ¿Tu empresa tiene su propio sistema?
+          <span className="flex items-center gap-3">
+            <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-brand/10 text-brand-deep">
+              <Braces size={15} aria-hidden />
+            </span>
+            ¿Tu empresa tiene su propio sistema?
+          </span>
           <ChevronDown
             size={18}
             aria-hidden
@@ -270,8 +446,20 @@ export function BulkUpload() {
         </summary>
         <div className="space-y-4 pb-4 text-sm">
           <p className="text-foreground/80">
-            Tu sistema puede enviarnos los envíos en este formato JSON, con los mismos campos de la
-            plantilla.
+            Tu sistema puede crear los envíos directamente, con tu API key y los mismos campos de la
+            plantilla. Cada envío se procesa por separado: los inválidos se rechazan con su motivo y
+            los demás se crean.
+          </p>
+          <pre className="overflow-x-auto rounded-xl bg-card p-3 font-mono text-xs leading-relaxed">
+            {INTEGRATION_REQUEST}
+          </pre>
+          <p className="text-xs text-muted-foreground">
+            Repetir el mismo lote con la misma referencia no duplica envíos. El resultado de cada
+            envío se consulta en{' '}
+            <span className="font-mono">
+              GET {BATCHES_URL}/{'{id}'}/items
+            </span>
+            .
           </p>
           <ul className="divide-y rounded-xl bg-card">
             {BULK_COLUMNS.map((column) => (
@@ -294,7 +482,7 @@ export function BulkUpload() {
 
 function Step({ number, title, children }: { number: number; title: string; children: ReactNode }) {
   return (
-    <section className="space-y-3 rounded-[1.25rem] bg-card p-4 shadow-card sm:rounded-[1.75rem] sm:p-5">
+    <Reveal as="section" className={cn(SURFACE, 'space-y-3 p-4 sm:p-5')}>
       <h2 className="flex items-center gap-2.5 font-medium">
         <span className="grid size-7 place-items-center rounded-full bg-brand-deep text-xs text-brand-foreground">
           {number}
@@ -302,7 +490,7 @@ function Step({ number, title, children }: { number: number; title: string; chil
         {title}
       </h2>
       {children}
-    </section>
+    </Reveal>
   )
 }
 
@@ -312,8 +500,8 @@ function RowCard({ row }: { row: BulkRow }) {
   return (
     <li
       className={cn(
-        'space-y-1.5 rounded-2xl border p-3',
-        errors.length > 0 && 'border-destructive/40 bg-destructive/5',
+        'space-y-1.5 rounded-2xl bg-muted/50 p-3',
+        errors.length > 0 && 'bg-destructive/5',
       )}
     >
       <div className="flex items-center justify-between gap-2">
@@ -324,11 +512,15 @@ function RowCard({ row }: { row: BulkRow }) {
           )}
         </p>
         {row.shipment ? (
-          <StatusDot tone="ok">Lista</StatusDot>
+          <Badge variant="success">
+            <BadgeDot />
+            Lista
+          </Badge>
         ) : (
-          <span className="shrink-0 text-xs text-destructive">
+          <Badge variant="destructive">
+            <BadgeDot />
             {errors.length} error{errors.length === 1 ? '' : 'es'}
-          </span>
+          </Badge>
         )}
       </div>
       <p className="text-sm text-foreground/80">

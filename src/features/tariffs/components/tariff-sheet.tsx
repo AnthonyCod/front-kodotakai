@@ -6,6 +6,7 @@ import { CITIES } from '@/features/quote'
 import { formatCop } from '@/shared/lib/format'
 import { normalizeText } from '@/shared/lib/text-match'
 import { FIELD, FIELD_LABEL } from '@/shared/ui/form-styles'
+import { PAGE_TITLE, SURFACE } from '@/shared/ui/page'
 import { fleteBase, routesFrom, type RouteTariff } from '../model/routes'
 import {
   EXTRA_SERVICES,
@@ -16,7 +17,7 @@ import {
 } from '../model/tariffs'
 
 const SECTION_TITLE = 'text-xs font-medium tracking-wide text-muted-foreground uppercase'
-const CARD = 'rounded-[1.25rem] bg-card p-4 shadow-card sm:p-5'
+const CARD = `${SURFACE} p-4 sm:p-5`
 const CHIP = 'shrink-0 rounded-full bg-muted px-3 py-1 text-xs text-foreground/70'
 
 const EXTRA_ICON: Record<ExtraService['id'], ReactNode> = {
@@ -41,7 +42,7 @@ const effectiveDate = new Date(`${TARIFF_EFFECTIVE_DATE}T12:00:00`).toLocaleDate
 /** Tarifas y servicios (`/info/tarifas`): tarifas ciudad a ciudad, adicionales y condiciones. */
 export function TariffSheet() {
   return (
-    <article className="mx-auto w-full max-w-3xl space-y-7 px-3 py-3 sm:space-y-9 sm:px-6 sm:py-6">
+    <article className="mx-auto w-full max-w-3xl space-y-7 px-4 py-3 sm:space-y-9 sm:px-6 sm:py-6">
       <div className="space-y-3">
         <Link
           to="/info"
@@ -49,7 +50,7 @@ export function TariffSheet() {
         >
           <ArrowLeft size={16} aria-hidden /> Información legal
         </Link>
-        <h1 className="text-2xl leading-tight font-medium sm:text-3xl">Tarifas y servicios</h1>
+        <h1 className={PAGE_TITLE}>Tarifas y servicios</h1>
         <div className="flex flex-wrap gap-2">
           <span className={CHIP}>Versión {TARIFF_VERSION}</span>
           <span className={CHIP}>Vigente desde {effectiveDate}</span>

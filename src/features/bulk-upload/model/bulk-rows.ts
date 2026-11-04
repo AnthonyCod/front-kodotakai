@@ -1,12 +1,17 @@
 import { z } from 'zod'
 import { CITIES, shipmentFormSchema } from '@/features/quote'
 import { normalizeText, resolveOption } from '@/shared/lib/text-match'
+import type { ShipmentBatchRequest } from '../api/batches-api'
 import { BULK_COLUMNS, MAX_ROWS, type BulkColumnKey } from './bulk-columns'
 
 const text = (missing: string, max: number) =>
   z.string({ error: missing }).trim().min(1, missing).max(max, `Máximo ${max} caracteres.`)
 
-/** Una fila = un envío. Paquete con las reglas de `/cotizar`; destinatario (por confirmar). */
+/**
+ * Una fila = un envío del lote (`POST /shipment-batches`): paquete con las reglas de `/cotizar`,
+ * `referencia_cliente` y destinatario (nombre, teléfono y dirección obligatorios). Largos máximos y
+ * formato del teléfono: (por confirmar) con el backend.
+ */
 const bulkRowSchema = shipmentFormSchema.extend({
   referencia_cliente: text('Escribe la referencia del pedido.', 40),
   destinatario_nombre: text('Escribe el nombre del destinatario.', 80),
@@ -150,10 +155,13 @@ function validateRow(original: Record<BulkColumnKey, string>, line: number): Bul
   return { line, cells, shipment, errors, corrected }
 }
 
-/** JSON del lote propuesto al backend (por confirmar): solo las filas válidas. */
-export function buildBatch(referenciaLote: string, rows: BulkRow[]) {
+/** Filas que van en el lote, en orden: solo las válidas. */
+export const sendableRows = (rows: BulkRow[]) => rows.filter((row) => row.shipment)
+
+/** Cuerpo de `POST /shipment-batches`. `referencia_lote` también va como `Idempotency-Key`. */
+export function buildBatch(referenciaLote: string, rows: BulkRow[]): ShipmentBatchRequest {
   return {
-    referencia_lote: referenciaLote.trim() || undefined,
+    referencia_lote: referenciaLote.trim(),
     envios: rows.flatMap((row) => (row.shipment ? [row.shipment] : [])),
   }
 }
