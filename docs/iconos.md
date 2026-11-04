@@ -76,19 +76,19 @@ Nombres verificados en el registro (381 iconos Hugeicons disponibles).
 
 ### Chat (`/`, feature `chat`)
 
-| Uso                              | Icono                                                        | Componente                                    |
-| -------------------------------- | ------------------------------------------------------------ | --------------------------------------------- |
-| Enviar mensaje                   | `send-horizontal`                                            | Composer                                      |
-| Hablar con un asesor             | `headphones`                                                 | ChatHeader                                    |
-| Avatar del asistente IA          | `bot-message-square`                                         | burbuja IA                                    |
-| Escribiendo…                     | `message-circle-more`                                        | TypingIndicator (`loop`)                      |
-| Cargando datos del TMS…          | `loading-01`                                                 | estado del sistema                            |
-| Reintentar                       | `refresh`                                                    | error de envío                                |
-| Sin conexión                     | `wifi-off-01`                                                | StatusBanners                                 |
-| Esperando asesor                 | `timer`                                                      | StatusBanners                                 |
-| Sugerencias / respuestas rápidas | `sparkles`                                                   | quick_replies                                 |
-| Sugerencias de bienvenida        | `Truck`, `Calculator`, `BookOpen` (lucide), `triangle-alert` | ChatView (rastrear, cotizar, norma, problema) |
-| Adjuntar (P1)                    | `attachment-01`                                              | Composer                                      |
+| Uso                              | Icono                                     | Componente                                   |
+| -------------------------------- | ----------------------------------------- | -------------------------------------------- |
+| Enviar mensaje                   | `send-horizontal`                         | Composer                                     |
+| Hablar con un asesor             | `headphones`                              | ChatHeader                                   |
+| Avatar del asistente IA          | `bot-message-square`                      | burbuja IA                                   |
+| Escribiendo…                     | `message-circle-more`                     | TypingIndicator (`loop`)                     |
+| Cargando datos del TMS…          | `loading-01`                              | estado del sistema                           |
+| Reintentar                       | `refresh`                                 | error de envío                               |
+| Sin conexión                     | `wifi-off-01`                             | StatusBanners                                |
+| Esperando asesor                 | `timer`                                   | StatusBanners                                |
+| Sugerencias / respuestas rápidas | `sparkles`                                | quick_replies                                |
+| Banners del inicio               | `PackagePlus`, `MapPin`, `Truck` (lucide) | ChatView (hacer envío, sucursales, rastrear) |
+| Adjuntar (P1)                    | `attachment-01`                           | Composer                                     |
 
 ### Rastreo (feature `tracking`)
 
@@ -167,14 +167,15 @@ No se usan logotipos de marcas reales (regla del proyecto), por eso WhatsApp va 
 
 ### Barra lateral (`app/user-layout.tsx`)
 
-| Uso                  | Icono                                                         |
-| -------------------- | ------------------------------------------------------------- |
-| Chat con Logi        | `bot-message-square`                                          |
-| Consultas            | `Package` (lucide)                                            |
-| WhatsApp y llamada   | `message-circle`                                              |
-| Paso hecho / novedad | `checkmark-circle-02` / `triangle-alert` (tarjeta de rastreo) |
-| Administrador        | `layout-dashboard`                                            |
-| Reloj de la cabecera | `clock-01` (`shared/ui/live-clock.tsx`)                       |
+| Uso                  | Icono                                                                                    |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| Chat con Logi        | `bot-message-square`                                                                     |
+| Consultas            | `Package` (lucide)                                                                       |
+| WhatsApp y llamada   | `message-circle`                                                                         |
+| Paso hecho / novedad | `checkmark-circle-02` / `triangle-alert` (tarjeta de rastreo)                            |
+| Administrador        | `layout-dashboard`                                                                       |
+| Barra inferior móvil | `House` (lucide), `Package` (lucide), logo de Logi, `message-circle`, `layout-dashboard` |
+| Reloj de la cabecera | `clock-01` (`shared/ui/live-clock.tsx`)                                                  |
 
 ### Administrador (`/admin`, feature `business-insights`)
 

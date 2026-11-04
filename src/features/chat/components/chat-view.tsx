@@ -1,5 +1,13 @@
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
-import { BookOpen, Calculator, Mic, Square, Truck, Volume2, VolumeX } from 'lucide-react'
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ComponentType,
+  type FormEvent,
+  type ReactNode,
+} from 'react'
+import { Link } from 'react-router'
+import { MapPin, Mic, PackagePlus, Square, Truck, Volume2, VolumeX } from 'lucide-react'
 import { cn } from 'cn'
 import logiUrl from '@/assets/logi.jpg'
 import { ATTACHMENT_LIMITS, uploadAttachment } from '@/features/pqrs'
@@ -9,46 +17,44 @@ import { useSpeechRecognition } from '@/shared/hooks/use-speech-recognition'
 import { isSpeechSynthesisSupported, stopSpeaking } from '@/shared/lib/speech-synthesis'
 import { Attachment01 } from '@/shared/components/animate-ui/icons/hugeicons/attachment-01'
 import { SendHorizontal } from '@/shared/components/animate-ui/icons/hugeicons/send-horizontal'
-import { TriangleAlert } from '@/shared/components/animate-ui/icons/hugeicons/triangle-alert'
 import { GLASS, GLASS_ON_BRAND, GLASS_TINT } from '@/shared/ui/glass'
 import { InteractiveGradient } from '@/shared/ui/interactive-gradient'
 import { RevealContext, SplitText } from '@/shared/ui/split-text'
 import { useChatStore } from '../model/chat-store'
-import type { QuickReplyAction } from '../model/quick-replies'
 import { MAX_MESSAGE_LENGTH, useSendMessage } from '../model/use-send-message'
 
 /** El título de bienvenida se revela una sola vez por carga de la página. */
 let titleRevealed = false
 
-/**
- * Puntos de partida de cada flujo. Ninguno trae datos inventados: si falta un dato (guía, pregunta),
- * se pide en la caja de texto; si no, se le dice a Logi qué quieres y ella pregunta lo que falte.
- */
-const SUGGESTIONS: { label: string; icon: ReactNode; action: QuickReplyAction }[] = [
+/** Accesos del inicio. "Hacer envío" arranca el flujo de cotización con Logi; los otros llevan a su página. */
+const HOME_BANNERS: {
+  label: string
+  description: string
+  Icon: ComponentType<{ className?: string; 'aria-hidden'?: boolean }>
+  target: { kind: 'send'; text: string } | { kind: 'link'; to: string }
+}[] = [
   {
-    label: 'Rastrear una guía',
-    icon: <Truck className="size-4" aria-hidden />,
-    action: { kind: 'focus_input', placeholder: '¿Cuál es tu número de guía? Ej.: TLX-123456-CO' },
+    label: 'Hacer envío',
+    description: 'Logi te cotiza en el chat',
+    Icon: PackagePlus,
+    target: { kind: 'send', text: 'Quiero cotizar un envío' },
   },
   {
-    label: 'Cotizar un envío',
-    icon: <Calculator className="size-4" aria-hidden />,
-    action: { kind: 'send', text: 'Quiero cotizar un envío' },
+    label: 'Ver sucursales',
+    description: 'Dónde estamos',
+    Icon: MapPin,
+    target: { kind: 'link', to: '/sucursales' },
   },
   {
-    label: 'Consultar una norma',
-    icon: <BookOpen className="size-4" aria-hidden />,
-    action: {
-      kind: 'focus_input',
-      placeholder: '¿Qué quieres saber? Ej.: ¿puedo enviar productos químicos?',
-    },
-  },
-  {
-    label: 'Reportar un problema',
-    icon: <TriangleAlert size={16} aria-hidden />,
-    action: { kind: 'send', text: 'Quiero reportar una novedad de mi envío' },
+    label: 'Rastrear envío',
+    description: 'Estado de tu guía',
+    Icon: Truck,
+    target: { kind: 'link', to: '/consultas' },
   },
 ]
+
+const BANNER =
+  'flex aspect-square flex-col justify-between rounded-[1.25rem] bg-card p-3 text-left shadow-card transition hover:-translate-y-0.5 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60 sm:aspect-[4/3] sm:rounded-[1.75rem] sm:p-5'
 
 // Objeto estable: el efecto no se reconfigura en cada render. Media resolución = fluido en móvil.
 const GRADIENT_OPTIONS = { resolutionScale: 0.6 }
@@ -62,7 +68,6 @@ const PANEL_PILL = `${GLASS_ON_BRAND} shrink-0 rounded-full px-3 py-1.5 text-xs 
 export function ChatView() {
   const { messages, pending, failed, status, blockedUntil, startNewChat } = useChatStore()
   const hint = useChatStore((s) => s.composerHint)
-  const setHint = useChatStore((s) => s.setComposerHint)
   const { send, retry } = useSendMessage()
   const endRef = useRef<HTMLDivElement>(null)
   const started = messages.length > 0
@@ -85,7 +90,7 @@ export function ChatView() {
         aria-live="polite"
       >
         {!started && (
-          <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
+          <div className="flex min-h-full flex-col items-center justify-center gap-4 py-2 text-center">
             <img
               src={logiUrl}
               alt="Logi, asistente de TransLogix"
@@ -97,24 +102,42 @@ export function ChatView() {
               text="¡Hola! Soy Logi, tu asistente de TransLogix, ¿en qué puedo ayudarte?"
               className="max-w-2xl text-xl leading-snug font-medium text-balance sm:text-3xl"
             />
-            <ul className="flex flex-wrap justify-center gap-2">
-              {SUGGESTIONS.map((suggestion) => (
-                <li key={suggestion.label}>
-                  <button
-                    type="button"
-                    disabled={pending}
-                    onClick={() =>
-                      suggestion.action.kind === 'send'
-                        ? void send(suggestion.action.text)
-                        : setHint(suggestion.action.placeholder)
-                    }
-                    className={`${GLASS} inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm`}
-                  >
-                    {suggestion.icon}
-                    {suggestion.label}
-                  </button>
-                </li>
-              ))}
+            <ul className="grid w-full max-w-3xl grid-cols-3 gap-2 pt-2 sm:gap-4">
+              {HOME_BANNERS.map(({ label, description, Icon, target }) => {
+                const content = (
+                  <>
+                    <span className="grid size-10 place-items-center rounded-full bg-muted text-foreground/70 sm:size-12">
+                      <Icon className="size-5 sm:size-6" aria-hidden />
+                    </span>
+                    <span>
+                      <span className="block text-sm leading-tight font-medium sm:text-lg">
+                        {label}
+                      </span>
+                      <span className="hidden text-sm text-muted-foreground sm:block">
+                        {description}
+                      </span>
+                    </span>
+                  </>
+                )
+                return (
+                  <li key={label}>
+                    {target.kind === 'send' ? (
+                      <button
+                        type="button"
+                        disabled={pending}
+                        onClick={() => void send(target.text)}
+                        className={cn(BANNER, 'w-full')}
+                      >
+                        {content}
+                      </button>
+                    ) : (
+                      <Link to={target.to} className={BANNER}>
+                        {content}
+                      </Link>
+                    )}
+                  </li>
+                )
+              })}
             </ul>
           </div>
         )}

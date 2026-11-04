@@ -1,6 +1,6 @@
 import type { ComponentType } from 'react'
-import { NavLink, Outlet } from 'react-router'
-import { Package } from 'lucide-react'
+import { NavLink, Outlet, useNavigate } from 'react-router'
+import { House, Package } from 'lucide-react'
 import { cn } from 'cn'
 import logiUrl from '@/assets/logi.jpg'
 import { LiveClock } from '@/shared/ui/live-clock'
@@ -11,8 +11,6 @@ import { MessageCircle } from '@/shared/components/animate-ui/icons/hugeicons/me
 interface Section {
   to: string
   label: string
-  /** Etiqueta en las pestañas de móvil. */
-  short: string
   hint: string
   Icon: ComponentType<{ size?: number; className?: string; 'aria-hidden'?: boolean }>
 }
@@ -22,21 +20,18 @@ const SECTIONS: Section[] = [
   {
     to: '/',
     label: 'Chat con Logi',
-    short: 'Chat',
     hint: 'Pregunta lo que quieras',
     Icon: BotMessageSquare,
   },
   {
     to: '/consultas',
     label: 'Consultas',
-    short: 'Consultas',
     hint: 'Rastrear, cotizar, PQRS',
     Icon: Package,
   },
   {
     to: '/simulador',
     label: 'WhatsApp y llamada',
-    short: 'WhatsApp',
     hint: 'Simulador de canales',
     Icon: MessageCircle,
   },
@@ -47,67 +42,148 @@ const ADMIN_SECTIONS: Section[] = [
   {
     to: '/admin',
     label: 'Inteligencia de negocio',
-    short: 'Admin',
     hint: 'Dashboard por ruta',
     Icon: LayoutDashboard,
   },
 ]
 
-/** Escritorio: barra lateral de secciones. Móvil: cabecera con las secciones en pestañas. */
+const LOGO_SHADOW = 'shadow-[0_1px_2px_rgb(0_0_0/0.08),0_8px_20px_rgb(30_58_138/0.18)]'
+
+/** Barra inferior en móvil (estilo app): Logi al centro, destacado. */
+interface Tab {
+  to: string
+  label: string
+  Icon: Section['Icon']
+}
+const LEFT_TABS: Tab[] = [
+  { to: '/', label: 'Inicio', Icon: House },
+  { to: '/consultas', label: 'Consultas', Icon: Package },
+]
+const RIGHT_TABS: Tab[] = [
+  { to: '/simulador', label: 'WhatsApp', Icon: MessageCircle },
+  { to: '/admin', label: 'Admin', Icon: LayoutDashboard },
+]
+
+/** Escritorio: barra lateral de secciones. Móvil: cabecera con logo y hora, y barra inferior. */
 export function UserLayout() {
   return (
     <div className="flex h-dvh flex-col bg-background md:flex-row">
-      <aside className="flex shrink-0 flex-col gap-3 border-b bg-sidebar px-3 pt-3 pb-2 md:w-64 md:gap-6 md:border-r md:border-b-0 md:px-4 md:py-5">
+      <aside className="hidden w-64 shrink-0 flex-col gap-6 border-r bg-sidebar px-4 py-5 md:flex">
         <div className="flex items-center gap-3 px-1">
           <img
             src={logiUrl}
             alt=""
-            className="size-10 -rotate-6 rounded-[22%] shadow-[0_1px_2px_rgb(0_0_0/0.08),0_8px_20px_rgb(30_58_138/0.18)] md:size-14"
+            className={cn('size-14 -rotate-6 rounded-[22%]', LOGO_SHADOW)}
           />
-          <p className="text-base font-medium tracking-wide md:text-lg">TRANSLOGIX</p>
+          <p className="text-lg font-medium tracking-wide">TRANSLOGIX</p>
         </div>
 
-        <div className="flex gap-1 overflow-x-auto md:flex-col md:gap-6 md:overflow-visible">
-          <nav aria-label="Secciones" className="flex gap-1 md:flex-col md:gap-1.5">
-            {SECTIONS.map((section) => (
-              <SectionLink key={section.to} {...section} />
-            ))}
-          </nav>
+        <nav aria-label="Secciones" className="flex flex-col gap-1.5">
+          {SECTIONS.map((section) => (
+            <SectionLink key={section.to} {...section} />
+          ))}
+        </nav>
 
-          <nav
-            aria-label="Administrador"
-            className="flex gap-1 border-l pl-1 md:flex-col md:gap-1.5 md:border-t md:border-l-0 md:pt-4 md:pl-0"
-          >
-            <p className="hidden px-3 text-xs font-medium tracking-wide text-muted-foreground uppercase md:block">
-              Administrador
-            </p>
-            {ADMIN_SECTIONS.map((section) => (
-              <SectionLink key={section.to} {...section} />
-            ))}
-          </nav>
-        </div>
+        <nav aria-label="Administrador" className="flex flex-col gap-1.5 border-t pt-4">
+          <p className="px-3 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+            Administrador
+          </p>
+          {ADMIN_SECTIONS.map((section) => (
+            <SectionLink key={section.to} {...section} />
+          ))}
+        </nav>
       </aside>
 
       <main className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex shrink-0 justify-end px-3 pt-3 sm:px-6 sm:pt-4">
+        <header className="flex shrink-0 items-center justify-between gap-3 px-3 pt-3 sm:px-6 sm:pt-4 md:justify-end">
+          <div className="flex items-center gap-2.5 md:hidden">
+            <img
+              src={logiUrl}
+              alt=""
+              className={cn('size-9 -rotate-6 rounded-[22%]', LOGO_SHADOW)}
+            />
+            <p className="font-medium tracking-wide">TRANSLOGIX</p>
+          </div>
           <LiveClock />
         </header>
         <div className="min-h-0 flex-1 overflow-y-auto">
           <Outlet />
         </div>
+        <MobileTabBar />
       </main>
     </div>
   )
 }
 
-function SectionLink({ to, label, short, hint, Icon }: Section) {
+function MobileTabBar() {
+  const navigate = useNavigate()
+
+  /** Logi: lleva al inicio y deja lista la caja de texto del chat. */
+  function openLogi() {
+    void navigate('/')
+    // El chat se monta tras la navegación: se reintenta un momento hasta encontrar la caja.
+    let tries = 10
+    const focusComposer = () => {
+      const composer = document.getElementById('composer')
+      if (composer) composer.focus()
+      else if (--tries > 0) window.setTimeout(focusComposer, 30)
+    }
+    window.setTimeout(focusComposer, 0)
+  }
+
+  return (
+    <nav
+      aria-label="Secciones"
+      className="grid shrink-0 grid-cols-5 items-end border-t bg-card/85 px-1 pt-1.5 pb-[max(env(safe-area-inset-bottom),0.5rem)] backdrop-blur-md md:hidden"
+    >
+      {LEFT_TABS.map((tab) => (
+        <TabLink key={tab.to} {...tab} />
+      ))}
+      <button
+        type="button"
+        onClick={openLogi}
+        className="flex flex-col items-center gap-1 text-[11px] font-medium text-brand-deep"
+      >
+        <img
+          src={logiUrl}
+          alt=""
+          className={cn('-mt-5 size-12 rounded-[28%] ring-4 ring-card', LOGO_SHADOW)}
+        />
+        Logi
+      </button>
+      {RIGHT_TABS.map((tab) => (
+        <TabLink key={tab.to} {...tab} />
+      ))}
+    </nav>
+  )
+}
+
+function TabLink({ to, label, Icon }: Tab) {
   return (
     <NavLink
       to={to}
       end
       className={({ isActive }) =>
         cn(
-          'flex shrink-0 items-center gap-2 rounded-full px-3 py-2 text-sm transition md:gap-3 md:rounded-2xl md:py-2.5',
+          'flex flex-col items-center gap-1 py-1 text-[11px] transition',
+          isActive ? 'font-medium text-brand-deep' : 'text-muted-foreground',
+        )
+      }
+    >
+      <Icon size={22} aria-hidden />
+      {label}
+    </NavLink>
+  )
+}
+
+function SectionLink({ to, label, hint, Icon }: Section) {
+  return (
+    <NavLink
+      to={to}
+      end
+      className={({ isActive }) =>
+        cn(
+          'flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm transition',
           isActive
             ? 'bg-card font-medium text-brand-deep shadow-card'
             : 'text-muted-foreground hover:bg-card/60 hover:text-foreground',
@@ -116,11 +192,8 @@ function SectionLink({ to, label, short, hint, Icon }: Section) {
     >
       <Icon size={20} aria-hidden className="shrink-0" />
       <span className="min-w-0">
-        <span className="block truncate md:hidden">{short}</span>
-        <span className="hidden truncate md:block">{label}</span>
-        <span className="hidden truncate text-xs font-normal text-muted-foreground md:block">
-          {hint}
-        </span>
+        <span className="block truncate">{label}</span>
+        <span className="block truncate text-xs font-normal text-muted-foreground">{hint}</span>
       </span>
     </NavLink>
   )

@@ -5,6 +5,7 @@ import { ChannelSimulatorPage } from '@/pages/channel-simulator-page'
 import { ChatPage } from '@/pages/chat-page'
 import { MetricsPage } from '@/pages/metrics-page'
 import { QueriesPage } from '@/pages/queries-page'
+import { BranchesPage } from '@/pages/branches-page'
 import { InternalLayout } from './internal-layout'
 import { UserLayout } from './user-layout'
 
@@ -16,6 +17,7 @@ export const router = createBrowserRouter([
     children: [
       { path: '/', element: <ChatPage /> },
       { path: '/consultas', element: <QueriesPage /> },
+      { path: '/sucursales', element: <BranchesPage /> },
       { path: '/simulador', element: <ChannelSimulatorPage /> },
       // Sin login todavía (por confirmar con el backend).
       { path: '/admin', element: <AdminInsightsPage /> },
