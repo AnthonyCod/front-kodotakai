@@ -1,0 +1,4 @@
+allowBuilds:
+  '@ybouane/liquidglass': set this to true or false
+minimumReleaseAge: 0
+
