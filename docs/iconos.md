@@ -144,34 +144,12 @@ Nombres verificados en el registro (381 iconos Hugeicons disponibles).
 | Nueva alerta | `bell-ring`       |
 | Notificación | `notification-01` |
 
-### Simulador (`/simulador`, feature `channel-simulator`)
-
-| Uso                           | Icono                                                        |
-| ----------------------------- | ------------------------------------------------------------ |
-| Web Chat                      | `globe-02`                                                   |
-| WhatsApp (simulado)           | `message-circle`                                             |
-| PBX (simulado)                | `phone-call`                                                 |
-| Colgar, voz, papelera, buscar | `PhoneOff`, `Volume2`/`VolumeX`, `Trash2`, `Search` (lucide) |
-| Entrada por voz               | `mic`                                                        |
-
-No se usan logotipos de marcas reales (regla del proyecto), por eso WhatsApp va con `message-circle`.
-
-### Asesor y métricas (`/interno/asesor`, `/interno/metricas`)
-
-| Uso                             | Icono                       |
-| ------------------------------- | --------------------------- |
-| Bandeja de casos                | `users-round`               |
-| Sentimiento negativo / positivo | `thumbs-down` / `thumbs-up` |
-| Métricas                        | `chart-column-increasing`   |
-| Navegación: métricas            | `layout-dashboard`          |
-
 ### Barra lateral (`app/user-layout.tsx`)
 
 | Uso                  | Icono                                                                 |
 | -------------------- | --------------------------------------------------------------------- |
 | Chat con Logi        | `bot-message-square`                                                  |
 | Consultas            | `Package` (lucide)                                                    |
-| WhatsApp y llamada   | `message-circle`                                                      |
 | Paso hecho / novedad | `checkmark-circle-02` / `triangle-alert` (tarjeta de rastreo)         |
 | Administrador        | `layout-dashboard`                                                    |
 | Barra inferior móvil | `Truck`, `MapPin`, `FileUp`, `Info` (lucide) y logo de Logi al centro |
@@ -212,7 +190,8 @@ Para esos se usa `lucide-react` (ya instalado, estático):
 | Ciudad sugerida                            | `MapPin` (`Autocomplete`)                                                                               |
 | Centro legal: datos, documento, aviso, FAQ | `ShieldCheck`, `FileText`, `Package`, `ChevronRight`, `ChevronDown`, `ArrowLeft` + `bot-message-square` |
 | Carga masiva: plantilla, archivo, JSON     | `FileDown`, `FileSpreadsheet`, `FileUp`, `CircleAlert`, `ChevronDown` (lucide)                          |
-| Tarifas: entrada, adicionales              | `Calculator`, `Search`, `Snowflake`, `TriangleAlert`, `HandCoins`, `Undo2` (lucide)                     |
+| Tarifas: entrada, adicionales, admin       | `Calculator`, `Search`, `Snowflake`, `TriangleAlert`, `ChevronDown`, `Plus` (lucide)                    |
+| Login: ingresar, contraseña, cerrar        | `UserRound`, `Eye`, `EyeOff`, `X`, `LogOut` (lucide)                                                    |
 
 Antes de agregar un icono nuevo, buscarlo en el registro (MCP de shadcn o
 `pnpm dlx shadcn@latest search @animate-ui -q <texto>`) y añadirlo a esta tabla.

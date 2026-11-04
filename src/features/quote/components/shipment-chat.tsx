@@ -1,9 +1,11 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { PackagePlus } from 'lucide-react'
 import { cn } from 'cn'
 import logiUrl from '@/assets/logi.jpg'
+import { useRequireAuth } from '@/features/auth'
+import { requestShipment, SHIPMENTS_QUERY_KEY } from '@/features/shipments'
 import { formatCop } from '@/shared/lib/format'
 import { BlockCard, BlockHeader } from '@/shared/ui/block-card'
 import { Autocomplete } from '@/shared/ui/autocomplete'
@@ -50,6 +52,12 @@ export function ShipmentChat() {
   const [errors, setErrors] = useState<ShipmentErrors>({})
   const [sent, setSent] = useState<QuoteRequest | null>(null)
   const mutation = useMutation({ mutationFn: createQuote })
+  const queryClient = useQueryClient()
+  const save = useMutation({
+    mutationFn: requestShipment,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: SHIPMENTS_QUERY_KEY }),
+  })
+  const requireAuth = useRequireAuth()
   const endRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -59,7 +67,7 @@ export function ShipmentChat() {
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: 'end', behavior: 'smooth' })
-  }, [intro, sent, mutation.status])
+  }, [intro, sent, mutation.status, save.status])
 
   function submit(event: FormEvent) {
     event.preventDefault()
@@ -72,12 +80,20 @@ export function ShipmentChat() {
 
   function restart() {
     mutation.reset()
+    save.reset()
     setSent(null)
     setValues(EMPTY)
     setErrors({})
   }
 
   const data = mutation.data
+
+  /** Solicitar exige cuenta: sin sesión se abre el login y, al ingresar, se envía solo. */
+  function saveShipment(cotizacionId: string) {
+    requireAuth('Ingresa para solicitar tu envío. Lo que llenaste no se pierde.', () =>
+      save.mutate(cotizacionId),
+    )
+  }
 
   return (
     <div className="mx-auto flex h-full w-full max-w-5xl flex-col gap-3 px-3 pt-3 pb-3 sm:px-6 sm:pt-6 sm:pb-5">
@@ -150,7 +166,7 @@ export function ShipmentChat() {
             <SplitText
               as="p"
               animate
-              text="Listo, este es el valor de tu envío. Guarda el código para consultarlo después."
+              text="Listo, este es el valor de tu envío. Si te sirve, solicítalo y un encargado lo revisa."
               className="text-[15px] leading-relaxed text-foreground/80 sm:text-base"
             />
             <QuoteSummary
@@ -164,13 +180,47 @@ export function ShipmentChat() {
               formula_version={data.formula_version}
               advertencias={data.advertencias}
             />
+            {!save.data && (
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  disabled={save.isPending}
+                  className={cn(PRIMARY_BUTTON, 'rounded-full')}
+                  onClick={() => saveShipment(data.cotizacion_id)}
+                >
+                  {save.isPending ? 'Enviando…' : 'Solicitar envío'}
+                </button>
+                <button
+                  type="button"
+                  className={`${GLASS} rounded-full px-4 py-2 text-sm`}
+                  onClick={restart}
+                >
+                  Cotizar otro envío
+                </button>
+              </div>
+            )}
+            <ErrorText error={save.error} />
+          </LogiRow>
+        )}
+
+        {save.data && (
+          <LogiRow>
+            <SplitText
+              as="p"
+              animate
+              text="¡Listo! Tu solicitud quedó pendiente de aprobación. Cuando un encargado la apruebe, verás el número de guía en Mis envíos."
+              className="text-[15px] leading-relaxed text-foreground/80 sm:text-base"
+            />
             <div className="flex flex-wrap gap-2">
+              <Link to="/mis-envios" className={cn(PRIMARY_BUTTON, 'rounded-full')}>
+                Ver mis envíos
+              </Link>
               <button
                 type="button"
                 className={`${GLASS} rounded-full px-4 py-2 text-sm`}
                 onClick={restart}
               >
-                Cotizar otro envío
+                Hacer otro envío
               </button>
               <Link to="/" className={`${GLASS} rounded-full px-4 py-2 text-sm`}>
                 Hablar con Logi

@@ -4,10 +4,10 @@ import { FileUp, Info, MapPin, Package, Truck } from 'lucide-react'
 import { cn } from 'cn'
 import logiUrl from '@/assets/logi.jpg'
 import { GLASS } from '@/shared/ui/glass'
+import { UserMenu } from '@/features/auth'
 import { LiveClock } from '@/shared/ui/live-clock'
 import { LayoutDashboard } from '@/shared/components/animate-ui/icons/hugeicons/layout-dashboard'
 import { BotMessageSquare } from '@/shared/components/animate-ui/icons/hugeicons/bot-message-square'
-import { MessageCircle } from '@/shared/components/animate-ui/icons/hugeicons/message-circle'
 
 interface Section {
   to: string
@@ -16,7 +16,7 @@ interface Section {
   Icon: ComponentType<{ size?: number; className?: string; 'aria-hidden'?: boolean }>
 }
 
-/** Los 3 módulos del cliente. Asesor y métricas del equipo viven aparte, en `/interno`. */
+/** Los módulos del cliente. */
 const SECTIONS: Section[] = [
   {
     to: '/',
@@ -29,12 +29,6 @@ const SECTIONS: Section[] = [
     label: 'Consultas',
     hint: 'Rastrear, cotizar, PQRS',
     Icon: Package,
-  },
-  {
-    to: '/simulador',
-    label: 'WhatsApp y llamada',
-    hint: 'Simulador de canales',
-    Icon: MessageCircle,
   },
 ]
 
@@ -125,7 +119,10 @@ export function UserLayout() {
               </NavLink>
             ))}
           </nav>
-          <LiveClock />
+          <div className="flex shrink-0 items-center gap-2">
+            <LiveClock />
+            <UserMenu />
+          </div>
         </header>
         <div className="min-h-0 flex-1 overflow-y-auto">
           <Outlet />
