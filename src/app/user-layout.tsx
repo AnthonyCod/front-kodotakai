@@ -183,7 +183,7 @@ function TabLink({ to, label, Icon }: Tab) {
   return (
     <NavLink
       to={to}
-      end
+      end={to === '/'}
       className={({ isActive }) =>
         cn(
           'flex flex-col items-center gap-1 py-1 text-[11px] transition',

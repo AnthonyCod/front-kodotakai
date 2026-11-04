@@ -1,11 +1,6 @@
-import { PagePlaceholder } from '@/shared/ui/page-placeholder'
+import { LegalHub } from '@/features/legal'
 
-/** Ruta `/info` — área legal: términos, privacidad y datos (contenido por confirmar). */
+/** Ruta `/info` — centro legal: resumen, documentos, derechos y preguntas frecuentes. */
 export function InfoPage() {
-  return (
-    <PagePlaceholder
-      title="Información legal"
-      description="Términos y condiciones, privacidad y tratamiento de datos."
-    />
-  )
+  return <LegalHub />
 }

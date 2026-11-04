@@ -1,5 +1,5 @@
 import { useState, type ComponentType } from 'react'
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { Calculator, Search, Truck } from 'lucide-react'
 import { cn } from 'cn'
 import mapaUrl from '@/assets/mapa-cobertura.webp'
@@ -18,6 +18,12 @@ interface Tool {
   title: string
   description: string
   Icon: ComponentType<{ size?: number; className?: string; 'aria-hidden'?: boolean }>
+}
+
+const TOOL_PARAMS: Record<string, QueryKind> = {
+  rastrear: 'TRACKING',
+  cotizar: 'QUOTE',
+  pqrs: 'PQRS',
 }
 
 const TOOLS: Tool[] = [
@@ -49,7 +55,11 @@ const KIND_LABELS: Record<QueryKind, string> = {
 
 /** Consultas directas (sin chat) con aspecto de tablero: banner, accesos, herramienta e historial. */
 export function QueriesDashboard() {
-  const [active, setActive] = useState<QueryKind>('TRACKING')
+  // `?herramienta=pqrs` (o `cotizar`) abre esa pestaña, p. ej. desde "Tus derechos" en /info.
+  const [params] = useSearchParams()
+  const [active, setActive] = useState<QueryKind>(
+    () => TOOL_PARAMS[params.get('herramienta') ?? ''] ?? 'TRACKING',
+  )
   const { entries, add } = useQueryHistoryStore()
   const tool = TOOLS.find((t) => t.kind === active) ?? TOOLS[0]!
 

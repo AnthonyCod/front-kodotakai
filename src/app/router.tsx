@@ -9,6 +9,8 @@ import { BranchesPage } from '@/pages/branches-page'
 import { ShipmentPage } from '@/pages/shipment-page'
 import { BulkUploadPage } from '@/pages/bulk-upload-page'
 import { InfoPage } from '@/pages/info-page'
+import { TariffsPage } from '@/pages/tariffs-page'
+import { LegalDocumentPage } from '@/pages/legal-document-page'
 import { InternalLayout } from './internal-layout'
 import { UserLayout } from './user-layout'
 
@@ -24,6 +26,8 @@ export const router = createBrowserRouter([
       { path: '/hacer-envio', element: <ShipmentPage /> },
       { path: '/carga-masiva', element: <BulkUploadPage /> },
       { path: '/info', element: <InfoPage /> },
+      { path: '/info/tarifas', element: <TariffsPage /> },
+      { path: '/info/:slug', element: <LegalDocumentPage /> },
       { path: '/simulador', element: <ChannelSimulatorPage /> },
       // Sin login todavía (por confirmar con el backend).
       { path: '/admin', element: <AdminInsightsPage /> },

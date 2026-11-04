@@ -76,19 +76,19 @@ Nombres verificados en el registro (381 iconos Hugeicons disponibles).
 
 ### Chat (`/`, feature `chat`)
 
-| Uso                              | Icono                                     | Componente                                   |
-| -------------------------------- | ----------------------------------------- | -------------------------------------------- |
-| Enviar mensaje                   | `send-horizontal`                         | Composer                                     |
-| Hablar con un asesor             | `headphones`                              | ChatHeader                                   |
-| Avatar del asistente IA          | `bot-message-square`                      | burbuja IA                                   |
-| Escribiendo…                     | `message-circle-more`                     | TypingIndicator (`loop`)                     |
-| Cargando datos del TMS…          | `loading-01`                              | estado del sistema                           |
-| Reintentar                       | `refresh`                                 | error de envío                               |
-| Sin conexión                     | `wifi-off-01`                             | StatusBanners                                |
-| Esperando asesor                 | `timer`                                   | StatusBanners                                |
-| Sugerencias / respuestas rápidas | `sparkles`                                | quick_replies                                |
-| Banners del inicio               | `PackagePlus`, `MapPin`, `Truck` (lucide) | ChatView (hacer envío, sucursales, rastrear) |
-| Adjuntar (P1)                    | `attachment-01`                           | Composer                                     |
+| Uso                              | Icono                                      | Componente                                       |
+| -------------------------------- | ------------------------------------------ | ------------------------------------------------ |
+| Enviar mensaje                   | `send-horizontal`                          | Composer                                         |
+| Hablar con un asesor             | `headphones`                               | ChatHeader                                       |
+| Avatar del asistente IA          | `bot-message-square`                       | burbuja IA                                       |
+| Escribiendo…                     | `message-circle-more`                      | TypingIndicator (`loop`)                         |
+| Cargando datos del TMS…          | `loading-01`                               | estado del sistema                               |
+| Reintentar                       | `refresh`                                  | error de envío                                   |
+| Sin conexión                     | `wifi-off-01`                              | StatusBanners                                    |
+| Esperando asesor                 | `timer`                                    | StatusBanners                                    |
+| Sugerencias / respuestas rápidas | `sparkles`                                 | quick_replies                                    |
+| Banners del inicio               | `PackagePlus`, `MapPin`, `FileUp` (lucide) | ChatView (hacer envío, sucursales, carga masiva) |
+| Adjuntar (P1)                    | `attachment-01`                            | Composer                                         |
 
 ### Rastreo (feature `tracking`)
 
@@ -201,15 +201,18 @@ No se usan logotipos de marcas reales (regla del proyecto), por eso WhatsApp va 
 El set de Hugeicons de Animate UI **no tiene** camión, paquete, calculadora, báscula ni libro.
 Para esos se usa `lucide-react` (ya instalado, estático):
 
-| Uso                       | Icono lucide                              |
-| ------------------------- | ----------------------------------------- |
-| En tránsito / en reparto  | `Truck`                                   |
-| Envío / guía              | `Package`                                 |
-| Cotizar envío             | `Calculator`                              |
-| Peso real / volumétrico   | `Scale`                                   |
-| Normativa                 | `BookOpen`                                |
-| Error de campo o consulta | `CircleAlert` (`FieldError`, `ErrorText`) |
-| Ciudad sugerida           | `MapPin` (`Autocomplete`)                 |
+| Uso                                        | Icono lucide                                                                                            |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| En tránsito / en reparto                   | `Truck`                                                                                                 |
+| Envío / guía                               | `Package`                                                                                               |
+| Cotizar envío                              | `Calculator`                                                                                            |
+| Peso real / volumétrico                    | `Scale`                                                                                                 |
+| Normativa                                  | `BookOpen`                                                                                              |
+| Error de campo o consulta                  | `CircleAlert` (`FieldError`, `ErrorText`)                                                               |
+| Ciudad sugerida                            | `MapPin` (`Autocomplete`)                                                                               |
+| Centro legal: datos, documento, aviso, FAQ | `ShieldCheck`, `FileText`, `Package`, `ChevronRight`, `ChevronDown`, `ArrowLeft` + `bot-message-square` |
+| Carga masiva: plantilla, archivo, JSON     | `FileDown`, `FileSpreadsheet`, `FileUp`, `CircleAlert`, `ChevronDown` (lucide)                          |
+| Tarifas: entrada, adicionales              | `Calculator`, `Search`, `Snowflake`, `TriangleAlert`, `HandCoins`, `Undo2` (lucide)                     |
 
 Antes de agregar un icono nuevo, buscarlo en el registro (MCP de shadcn o
 `pnpm dlx shadcn@latest search @animate-ui -q <texto>`) y añadirlo a esta tabla.

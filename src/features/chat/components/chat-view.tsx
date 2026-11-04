@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from 'react'
 import { Link } from 'react-router'
-import { MapPin, Mic, PackagePlus, Square, Truck, Volume2, VolumeX } from 'lucide-react'
+import { FileUp, MapPin, Mic, PackagePlus, Square, Volume2, VolumeX } from 'lucide-react'
 import { cn } from 'cn'
 import logiUrl from '@/assets/logi.jpg'
 import { ATTACHMENT_LIMITS, uploadAttachment } from '@/features/pqrs'
@@ -46,10 +46,10 @@ const HOME_BANNERS: {
     target: { kind: 'link', to: '/sucursales' },
   },
   {
-    label: 'Rastrear envío',
-    description: 'Estado de tu guía',
-    Icon: Truck,
-    target: { kind: 'link', to: '/consultas' },
+    label: 'Carga masiva',
+    description: 'Muchos envíos desde Excel',
+    Icon: FileUp,
+    target: { kind: 'link', to: '/carga-masiva' },
   },
 ]
 

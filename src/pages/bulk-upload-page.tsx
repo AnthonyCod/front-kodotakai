@@ -1,11 +1,6 @@
-import { PagePlaceholder } from '@/shared/ui/page-placeholder'
+import { BulkUpload } from '@/features/bulk-upload'
 
-/** Ruta `/carga-masiva` — subir varios envíos a la vez (por confirmar: sin endpoint en el backend). */
+/** Ruta `/carga-masiva` — crear muchos envíos desde un Excel (envío al backend por confirmar). */
 export function BulkUploadPage() {
-  return (
-    <PagePlaceholder
-      title="Carga masiva"
-      description="Sube varios envíos a la vez desde un archivo."
-    />
-  )
+  return <BulkUpload />
 }
