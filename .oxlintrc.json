@@ -1,0 +1,105 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "oxc", "import"],
+  "ignorePatterns": ["public/mockServiceWorker.js", "dist", "dev-dist"],
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/only-export-components": [
+      "warn",
+      {
+        "allowConstantExport": true
+      }
+    ],
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["@/features/*/**"],
+            "message": "Importa otra feature solo desde su index (API pública): '@/features/<nombre>'."
+          },
+          {
+            "group": ["@/mocks", "@/mocks/*"],
+            "message": "El código de la app no conoce los mocks; MSW intercepta la red."
+          }
+        ]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["src/shared/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@/features", "@/features/*", "@/app", "@/app/*", "@/pages", "@/pages/*"],
+                "message": "shared no depende de features, pages ni app."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/features/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@/features/*/**"],
+                "message": "Importa otra feature solo desde su index (API pública): '@/features/<nombre>'."
+              },
+              {
+                "group": ["@/app", "@/app/*", "@/pages", "@/pages/*", "@/mocks", "@/mocks/*"],
+                "message": "Una feature no depende de app, pages ni mocks."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/features/**/*.test.ts", "src/features/**/*.test.tsx"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@/features/*/**"],
+                "message": "Importa otra feature solo desde su index (API pública): '@/features/<nombre>'."
+              },
+              {
+                "group": ["@/app", "@/app/*", "@/pages", "@/pages/*"],
+                "message": "Una feature no depende de app ni pages. (Sus tests sí pueden usar @/mocks/node.)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/main.tsx", "src/test/**"],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    },
+    {
+      "files": [
+        "src/shared/ui/**",
+        "src/shared/components/**",
+        "src/shared/blocks/**",
+        "src/features/*/components/blocks/**",
+        "src/features/*/api/**"
+      ],
+      "rules": {
+        "react/only-export-components": "off"
+      }
+    }
+  ]
+}

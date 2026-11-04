@@ -1,0 +1,719 @@
+{
+  "replies": {
+    "saludo": {
+      "session_id": "e0d4abfc-cb6a-4c30-9f56-2360d6430435",
+      "in_reply_to": "6ac9ecf4-42fa-4593-9a5a-56b7c6a0cc57",
+      "reply_id": "7f5a1e99-c6dc-4d4f-8851-243961f57978",
+      "channel": "WEB_CHAT",
+      "status": "AWAITING_USER",
+      "blocks": [
+        {
+          "type": "TEXT",
+          "text": "¡Hola! Soy el asistente de TransLogix. Puedo rastrear una guía, cotizar un envío, resolver dudas sobre mercancías especiales o ayudarte a radicar una PQRS."
+        },
+        {
+          "type": "QUICK_REPLIES",
+          "options": [
+            {
+              "id": "rastrear",
+              "title": "Rastrear una guía"
+            },
+            {
+              "id": "cotizar",
+              "title": "Cotizar un envío"
+            },
+            {
+              "id": "asesor",
+              "title": "Hablar con un asesor"
+            }
+          ]
+        }
+      ],
+      "meta": {
+        "trace_id": "ee15da20-34c5-48ee-816c-f47679888426",
+        "intent": "SALUDO",
+        "confidence_score": null,
+        "confidence_method": null,
+        "escalation": {
+          "escalate": false,
+          "primary": null,
+          "triggers": [],
+          "mensaje_cliente": null,
+          "rules_version": "1.0.2026",
+          "config_snapshot": {
+            "CRIT003_MODE": "claim_context",
+            "CRIT005_MODE": "incident_context",
+            "CONFIDENCE_THRESHOLD": "0.75",
+            "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS",
+            "omitidas": "CRIT-001:sin_respuesta_rag,CRIT-003:sin_valores,CRIT-004:sin_datos_cuenta,CRIT-005:sin_datos_de_carga,INFO-INTENTOS:sin_dato"
+          }
+        },
+        "services_called": ["escalation"],
+        "evidence_ids": [],
+        "llm_used": false,
+        "delivery_mode": "SIMULATED"
+      },
+      "created_at": "2026-11-03T13:17:28.994065-05:00"
+    },
+    "tracking": {
+      "session_id": "e0d4abfc-cb6a-4c30-9f56-2360d6430435",
+      "in_reply_to": "20fac391-2d7c-4cf0-90c9-ac1c311f0bf5",
+      "reply_id": "f9fe97a8-cbac-450f-a27c-83bb930cebfa",
+      "channel": "WEB_CHAT",
+      "status": "AWAITING_USER",
+      "blocks": [
+        {
+          "type": "TEXT",
+          "text": "Guía TLX-984021-CO: En tránsito. Tu envío va en carretera hacia la ciudad de destino. Ubicación de referencia: Paso de Montaña Alto de la Línea - Sentido Bogotá-Ibague-Medellín. Entrega estimada: 3 de noviembre de 2026, 4:00 p. m. Última temperatura reportada: 3,8 °C."
+        },
+        {
+          "type": "TRACKING_CARD",
+          "numero_guia": "TLX-984021-CO",
+          "estado": {
+            "codigo": "EN_TRANSITO",
+            "etiqueta": "En tránsito",
+            "explicacion": "Tu envío va en carretera hacia la ciudad de destino."
+          },
+          "eta": "2026-11-03T16:00:00-05:00",
+          "ubicacion_referencia": "Paso de Montaña Alto de la Línea - Sentido Bogotá-Ibague-Medellín",
+          "eventos": [
+            {
+              "timestamp": "2026-11-02T18:45:00-05:00",
+              "estado": "EN_BODEGA_ORIGEN",
+              "etiqueta": "En bodega de origen",
+              "ubicacion": "Hub Central Zona Franca Fontibón",
+              "descripcion_cliente": "Consolidación en camión refrigerado."
+            },
+            {
+              "timestamp": "2026-11-03T02:15:00-05:00",
+              "estado": "EN_TRANSITO",
+              "etiqueta": "En tránsito",
+              "ubicacion": "Peaje Chicoral - Tolima",
+              "descripcion_cliente": "Monitoreo GPS activo. Temperatura de termógrafo estable a 3.8°C."
+            },
+            {
+              "timestamp": "2026-11-03T08:30:00-05:00",
+              "estado": "EN_TRANSITO",
+              "etiqueta": "En tránsito",
+              "ubicacion": "Corredor Calarcá - Pereira",
+              "descripcion_cliente": "Vehículo en ruta regular. Arribo estimado a Hub Itagüí a las 12:30 PM."
+            }
+          ],
+          "flags": {
+            "requiere_refrigeracion": true,
+            "mercancia_peligrosa": false
+          }
+        },
+        {
+          "type": "QUICK_REPLIES",
+          "options": [
+            {
+              "id": "cotizar",
+              "title": "Cotizar un envío"
+            },
+            {
+              "id": "asesor",
+              "title": "Hablar con un asesor"
+            }
+          ]
+        }
+      ],
+      "meta": {
+        "trace_id": "d38245b6-d579-4229-a211-d29994abeb73",
+        "intent": "TRACKING",
+        "confidence_score": null,
+        "confidence_method": null,
+        "escalation": {
+          "escalate": false,
+          "primary": null,
+          "triggers": [],
+          "mensaje_cliente": null,
+          "rules_version": "1.0.2026",
+          "config_snapshot": {
+            "CRIT003_MODE": "claim_context",
+            "CRIT005_MODE": "incident_context",
+            "CONFIDENCE_THRESHOLD": "0.75",
+            "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS",
+            "omitidas": "CRIT-001:sin_respuesta_rag,CRIT-003:fuera_de_contexto_de_reclamo,INFO-INTENTOS:sin_dato"
+          }
+        },
+        "services_called": ["tms", "escalation"],
+        "evidence_ids": ["TLX-984021-CO"],
+        "llm_used": false,
+        "delivery_mode": "SIMULATED"
+      },
+      "created_at": "2026-11-03T13:17:29.004216-05:00"
+    },
+    "cotizacion_ruta": {
+      "session_id": "9b95492e-d891-44aa-b149-abddd96057c2",
+      "in_reply_to": "9e65f828-4cba-464e-a9af-d13b8f7af48c",
+      "reply_id": "89fbcaf1-3fed-4456-bfc9-88cd27a334e0",
+      "channel": "WEB_CHAT",
+      "status": "AWAITING_USER",
+      "blocks": [
+        {
+          "type": "TEXT",
+          "text": "¿Cuáles son las medidas del paquete? Escríbelas como alto x ancho x largo en centímetros, por ejemplo 40x50x60."
+        }
+      ],
+      "meta": {
+        "trace_id": "28e43415-3d6a-406c-b1d3-25ed30532008",
+        "intent": "COTIZACION",
+        "confidence_score": null,
+        "confidence_method": null,
+        "escalation": {
+          "escalate": false,
+          "primary": null,
+          "triggers": [],
+          "mensaje_cliente": null,
+          "rules_version": "1.0.2026",
+          "config_snapshot": {
+            "CRIT003_MODE": "claim_context",
+            "CRIT005_MODE": "incident_context",
+            "CONFIDENCE_THRESHOLD": "0.75",
+            "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS",
+            "omitidas": "CRIT-001:sin_respuesta_rag,CRIT-003:sin_valores,CRIT-004:sin_datos_cuenta,CRIT-005:sin_datos_de_carga,INFO-INTENTOS:sin_dato"
+          }
+        },
+        "services_called": ["escalation"],
+        "evidence_ids": [],
+        "llm_used": false,
+        "delivery_mode": "SIMULATED"
+      },
+      "created_at": "2026-11-03T13:17:29.016854-05:00"
+    },
+    "cotizacion_resumen": {
+      "session_id": "9b95492e-d891-44aa-b149-abddd96057c2",
+      "in_reply_to": "98d0f8d1-6592-4e1d-9cee-4a3fdfdd31a4",
+      "reply_id": "2f2b8864-7922-4eef-80fe-d985cbf572e4",
+      "channel": "WEB_CHAT",
+      "status": "AWAITING_USER",
+      "blocks": [
+        {
+          "type": "TEXT",
+          "text": "Tu cotización de Bogotá D.C. a Medellín: flete total $190.975 (peso facturable 45,5 kg; seguro $125.000). Entrega estimada en 24 horas. Valores calculados con la fórmula provisional-v1."
+        },
+        {
+          "type": "QUOTE_SUMMARY",
+          "cotizacion_id": "f2fb7c8c-4bc7-4743-b249-62ac6e04ba4a",
+          "codigo_trayecto": "TLX-BOG-MED-001",
+          "origen": "Bogotá D.C.",
+          "destino": "Medellín",
+          "peso_facturable_kg": 45.5,
+          "flete_total_cop": 190975,
+          "tiempo_entrega_horas": 24,
+          "formula_version": "provisional-v1",
+          "advertencias": []
+        },
+        {
+          "type": "QUICK_REPLIES",
+          "options": [
+            {
+              "id": "cadena_frio",
+              "title": "Agregar cadena de frío"
+            },
+            {
+              "id": "asesor",
+              "title": "Hablar con un asesor"
+            }
+          ]
+        }
+      ],
+      "meta": {
+        "trace_id": "00e3fb73-5a0c-47fc-9df4-32e3a31167af",
+        "intent": "COTIZACION",
+        "confidence_score": null,
+        "confidence_method": null,
+        "escalation": {
+          "escalate": false,
+          "primary": null,
+          "triggers": [],
+          "mensaje_cliente": null,
+          "rules_version": "1.0.2026",
+          "config_snapshot": {
+            "CRIT003_MODE": "claim_context",
+            "CRIT005_MODE": "incident_context",
+            "CONFIDENCE_THRESHOLD": "0.75",
+            "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS",
+            "omitidas": "CRIT-001:sin_respuesta_rag,CRIT-003:sin_valores,CRIT-004:sin_datos_cuenta,CRIT-005:sin_datos_de_carga,INFO-INTENTOS:sin_dato"
+          }
+        },
+        "services_called": ["quotation", "escalation"],
+        "evidence_ids": ["f2fb7c8c-4bc7-4743-b249-62ac6e04ba4a"],
+        "llm_used": false,
+        "delivery_mode": "SIMULATED"
+      },
+      "created_at": "2026-11-03T13:17:29.029312-05:00"
+    },
+    "rag_citas": {
+      "session_id": "f23709fb-0db6-4bc3-9fff-4906915137db",
+      "in_reply_to": "e0878bc7-d8b2-4134-85d5-54f4c9287aca",
+      "reply_id": "8879b4af-b446-4398-9e27-1d63ce50ade3",
+      "channel": "WEB_CHAT",
+      "status": "AWAITING_USER",
+      "blocks": [
+        {
+          "type": "TEXT",
+          "text": "Sí, puedes enviar 5 litros de ácido clorhídrico de Bogotá a Cali, siempre que esté en envase primario hermético, bolsa de seguridad calibre 4 y caja de cartón corrugado de doble pared. Debes adjuntar la Hoja de Seguridad (MSDS) en español de 16 secciones y la Tarjeta de Emergencia NTC 4532."
+        },
+        {
+          "type": "CITATIONS",
+          "items": [
+            {
+              "doc_code": "DOC-OPS-2026-03",
+              "doc_title": "Manual operativo de mercancías peligrosas, estándares de embalaje y restricciones de carga",
+              "section_path": "6. GUÍA DE ATENCIÓN DE DUDAS EN LA PWA (PROMPTS Y CONTEXTO RAG)",
+              "chunk_id": "DOC-OPS-2026-03:0018",
+              "excerpt": "El motor RAG debe procesar las consultas de los usuarios en la PWA evaluando este manual de acuerdo a las siguientes reglas:\n\n* **Consulta:** *\"¿Puedo enviar 5 litros de ácido clor hídrico de Bogotá a Cali?\"*\n  * **Respuesta RAG esperada:** *\"El ácido clorhídrico es una sustancia corrosiva (Clase 8 ONU). En TransLogix Express en modalidad paquetería solo aceptamos envases con un máximo de 5 litros"
+            }
+          ]
+        },
+        {
+          "type": "QUICK_REPLIES",
+          "options": [
+            {
+              "id": "cotizar",
+              "title": "Cotizar un envío"
+            },
+            {
+              "id": "asesor",
+              "title": "Hablar con un asesor"
+            }
+          ]
+        }
+      ],
+      "meta": {
+        "trace_id": "c33d2f27-b21c-478c-97f4-b6bdcaa859db",
+        "intent": "CARGA_ESPECIAL",
+        "confidence_score": 0.8828,
+        "confidence_method": "heuristic_v1",
+        "escalation": {
+          "escalate": false,
+          "primary": null,
+          "triggers": [],
+          "mensaje_cliente": null,
+          "rules_version": "1.0.2026",
+          "config_snapshot": {
+            "CRIT003_MODE": "claim_context",
+            "CRIT005_MODE": "incident_context",
+            "CONFIDENCE_THRESHOLD": "0.75",
+            "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS",
+            "omitidas": "CRIT-003:sin_valores,CRIT-004:sin_datos_cuenta,CRIT-005:sin_datos_de_carga,INFO-INTENTOS:sin_dato"
+          }
+        },
+        "services_called": ["rag", "escalation"],
+        "evidence_ids": ["DOC-OPS-2026-03:0018"],
+        "llm_used": true,
+        "delivery_mode": "SIMULATED"
+      },
+      "created_at": "2026-11-03T13:17:29.033933-05:00"
+    },
+    "rag_fuera_de_corpus": {
+      "session_id": "8dc5cbb8-705f-453a-aa47-a35fbac92908",
+      "in_reply_to": "888af262-6256-4a96-b637-04a71d4b5653",
+      "reply_id": "a83ed4d5-f12d-45a9-a95a-742bd2dfebdb",
+      "channel": "WEB_CHAT",
+      "status": "ESCALATED",
+      "blocks": [
+        {
+          "type": "HANDOFF_NOTICE",
+          "handoff_id": "b98c45ed-e813-4131-92ca-4501cdd64df5",
+          "prioridad": "NORMAL",
+          "cola": "SERVICIO_CLIENTE",
+          "mensaje_cliente": "Entiendo tu consulta, pero para asegurarme de darte la información exacta, voy a conectarte de inmediato con un especialista en servicio al cliente.",
+          "tiempo_espera_estimado_segundos": 45
+        }
+      ],
+      "meta": {
+        "trace_id": "375801a8-39fc-4144-a156-acb3119447cb",
+        "intent": "CONSULTA_DOCUMENTAL",
+        "confidence_score": 0.3375,
+        "confidence_method": "heuristic_v1",
+        "escalation": {
+          "escalate": true,
+          "primary": {
+            "id_criterio": "CRIT-001",
+            "accion": "ESCALAR_A_HUMANO",
+            "accion_raw": "ESCALAR_A_HUMANO",
+            "evidencia": "confidence_score=0.34 < 0.75",
+            "modo": "literal"
+          },
+          "triggers": [
+            {
+              "id_criterio": "CRIT-001",
+              "accion": "ESCALAR_A_HUMANO",
+              "accion_raw": "ESCALAR_A_HUMANO",
+              "evidencia": "confidence_score=0.34 < 0.75",
+              "modo": "literal"
+            }
+          ],
+          "mensaje_cliente": "Entiendo tu consulta, pero para asegurarme de darte la información exacta, voy a conectarte de inmediato con un especialista en servicio al cliente.",
+          "rules_version": "1.0.2026",
+          "config_snapshot": {
+            "CRIT003_MODE": "claim_context",
+            "CRIT005_MODE": "incident_context",
+            "CONFIDENCE_THRESHOLD": "0.75",
+            "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS",
+            "omitidas": "CRIT-003:sin_valores,CRIT-004:sin_datos_cuenta,CRIT-005:sin_datos_de_carga,INFO-INTENTOS:sin_dato"
+          }
+        },
+        "services_called": ["rag", "escalation"],
+        "evidence_ids": [],
+        "llm_used": true,
+        "delivery_mode": "SIMULATED"
+      },
+      "created_at": "2026-11-03T13:17:35.800325-05:00"
+    },
+    "guia_retenida_escala": {
+      "session_id": "8900701e-fe1c-410a-bee9-6a12d3d9f0ab",
+      "in_reply_to": "4cd31600-e492-40ed-b032-dae9ed922107",
+      "reply_id": "8210804f-c2d3-47e7-a990-7d589b00ee5d",
+      "channel": "WEB_CHAT",
+      "status": "ESCALATED",
+      "blocks": [
+        {
+          "type": "TEXT",
+          "text": "Guía TLX-310482-CO: Retenido por novedad. Tu envío está detenido temporalmente por una novedad operativa. Ubicación de referencia: Puesto de Control POLFA / DIAN - Aguachica, Cesar. Entrega estimada: 3 de noviembre de 2026, 6:00 p. m."
+        },
+        {
+          "type": "TRACKING_CARD",
+          "numero_guia": "TLX-310482-CO",
+          "estado": {
+            "codigo": "RETENIDO_NOVEDAD",
+            "etiqueta": "Retenido por novedad",
+            "explicacion": "Tu envío está detenido temporalmente por una novedad operativa."
+          },
+          "eta": "2026-11-03T18:00:00-05:00",
+          "ubicacion_referencia": "Puesto de Control POLFA / DIAN - Aguachica, Cesar",
+          "eventos": [
+            {
+              "timestamp": "2026-11-01T16:00:00-05:00",
+              "estado": "RECOGIDO_EN_ORIGEN",
+              "etiqueta": "Recogido en origen",
+              "ubicacion": "Barranquilla, Atlántico",
+              "descripcion_cliente": "Verificación de rótulos IMO Clase 3 y tarjeta de emergencia en vehículo."
+            },
+            {
+              "timestamp": "2026-11-02T04:10:00-05:00",
+              "estado": "EN_TRANSITO",
+              "etiqueta": "En tránsito",
+              "ubicacion": "Troncal del Magdalena - Bosconia",
+              "descripcion_cliente": "Ruta de carretera conforme a plan de contingencia."
+            },
+            {
+              "timestamp": "2026-11-02T15:20:00-05:00",
+              "estado": "RETENIDO_NOVEDAD",
+              "etiqueta": "Retenido por novedad",
+              "ubicacion": "Aguachica, Cesar",
+              "descripcion_cliente": "NOVEDAD OPERATIVA: Retención preventiva en puesto de control POLFA para verificación documental de factura comercial y tarjeta de emergencia."
+            }
+          ],
+          "flags": {
+            "requiere_refrigeracion": false,
+            "mercancia_peligrosa": true
+          }
+        },
+        {
+          "type": "HANDOFF_NOTICE",
+          "handoff_id": "6c72e632-2ce5-4664-94ec-aac9ba6ba360",
+          "prioridad": "URGENTE",
+          "cola": "OPERACIONES",
+          "mensaje_cliente": "Identificamos que tu consulta involucra carga especial sensible. Un coordinador de operaciones tomará la llamada/chat prioritariamente.",
+          "tiempo_espera_estimado_segundos": 45
+        }
+      ],
+      "meta": {
+        "trace_id": "e097c336-d0d9-415a-b658-579cb1bf43aa",
+        "intent": "TRACKING",
+        "confidence_score": null,
+        "confidence_method": null,
+        "escalation": {
+          "escalate": true,
+          "primary": {
+            "id_criterio": "CRIT-005",
+            "accion": "ESCALAR_URGENCIA_OPERACIONES",
+            "accion_raw": "ESCALAR_Urgencia_OPERACIONES",
+            "evidencia": "mercancia_peligrosa=true; estado_guia=RETENIDO_NOVEDAD",
+            "modo": "incident_context"
+          },
+          "triggers": [
+            {
+              "id_criterio": "CRIT-005",
+              "accion": "ESCALAR_URGENCIA_OPERACIONES",
+              "accion_raw": "ESCALAR_Urgencia_OPERACIONES",
+              "evidencia": "mercancia_peligrosa=true; estado_guia=RETENIDO_NOVEDAD",
+              "modo": "incident_context"
+            }
+          ],
+          "mensaje_cliente": "Identificamos que tu consulta involucra carga especial sensible. Un coordinador de operaciones tomará la llamada/chat prioritariamente.",
+          "rules_version": "1.0.2026",
+          "config_snapshot": {
+            "CRIT003_MODE": "claim_context",
+            "CRIT005_MODE": "incident_context",
+            "CONFIDENCE_THRESHOLD": "0.75",
+            "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS",
+            "omitidas": "CRIT-001:sin_respuesta_rag,CRIT-003:fuera_de_contexto_de_reclamo,INFO-INTENTOS:sin_dato"
+          }
+        },
+        "services_called": ["tms", "escalation"],
+        "evidence_ids": ["TLX-310482-CO"],
+        "llm_used": false,
+        "delivery_mode": "SIMULATED"
+      },
+      "created_at": "2026-11-03T13:17:37.667457-05:00"
+    },
+    "esperando_asesor": {
+      "session_id": "8900701e-fe1c-410a-bee9-6a12d3d9f0ab",
+      "in_reply_to": "681b467f-8537-4e95-8b0f-8f56d25c3ef6",
+      "reply_id": "494bc388-56b6-4813-a02b-e1ef513964c2",
+      "channel": "WEB_CHAT",
+      "status": "ESCALATED",
+      "blocks": [
+        {
+          "type": "TEXT",
+          "text": "Tu caso ya está con un asesor de TransLogix. Te responderá en este mismo chat."
+        }
+      ],
+      "meta": {
+        "trace_id": "7a3c117b-8557-4528-9196-d799f65c6213",
+        "intent": "TRACKING",
+        "confidence_score": null,
+        "confidence_method": null,
+        "escalation": null,
+        "services_called": ["escalation"],
+        "evidence_ids": ["6c72e632-2ce5-4664-94ec-aac9ba6ba360"],
+        "llm_used": false,
+        "delivery_mode": "SIMULATED"
+      },
+      "created_at": "2026-11-03T13:17:37.676802-05:00"
+    },
+    "pide_asesor": {
+      "session_id": "e691d3a8-9716-4f12-b57b-4eb2f11481a1",
+      "in_reply_to": "50095cf8-9f67-4a08-a6ad-44f4547cf531",
+      "reply_id": "57a9eed5-c0d3-4b4e-96a7-b553e99eb313",
+      "channel": "WEB_CHAT",
+      "status": "ESCALATED",
+      "blocks": [
+        {
+          "type": "HANDOFF_NOTICE",
+          "handoff_id": "4a9cbcae-2bf4-488f-901c-dfd0eb336279",
+          "prioridad": "ALTA",
+          "cola": "SUPERVISOR",
+          "mensaje_cliente": "Lamento profundamente la molestia ocasionada. Estoy transfiriendo tu chat de inmediato a un supervisor de servicio al cliente para resolver tu situación.",
+          "tiempo_espera_estimado_segundos": 45
+        }
+      ],
+      "meta": {
+        "trace_id": "ae4b4ed8-0113-4a85-b29d-b8eded2fb24e",
+        "intent": "HABLAR_CON_HUMANO",
+        "confidence_score": null,
+        "confidence_method": null,
+        "escalation": {
+          "escalate": true,
+          "primary": {
+            "id_criterio": "CRIT-002",
+            "accion": "ESCALAR_PRIORIDAD_ALTA",
+            "accion_raw": "ESCALAR_PRIORIDAD_ALTA",
+            "evidencia": "solicitud explícita de asesor",
+            "modo": "intent"
+          },
+          "triggers": [
+            {
+              "id_criterio": "CRIT-002",
+              "accion": "ESCALAR_PRIORIDAD_ALTA",
+              "accion_raw": "ESCALAR_PRIORIDAD_ALTA",
+              "evidencia": "solicitud explícita de asesor",
+              "modo": "intent"
+            }
+          ],
+          "mensaje_cliente": "Lamento profundamente la molestia ocasionada. Estoy transfiriendo tu chat de inmediato a un supervisor de servicio al cliente para resolver tu situación.",
+          "rules_version": "1.0.2026",
+          "config_snapshot": {
+            "CRIT003_MODE": "claim_context",
+            "CRIT005_MODE": "incident_context",
+            "CONFIDENCE_THRESHOLD": "0.75",
+            "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS",
+            "omitidas": "CRIT-001:sin_respuesta_rag,CRIT-003:sin_valores,CRIT-004:sin_datos_cuenta,CRIT-005:sin_datos_de_carga,INFO-INTENTOS:sin_dato"
+          }
+        },
+        "services_called": ["escalation"],
+        "evidence_ids": [],
+        "llm_used": false,
+        "delivery_mode": "SIMULATED"
+      },
+      "created_at": "2026-11-03T13:17:37.684572-05:00"
+    },
+    "pqrs_dano": {
+      "session_id": "fa2d460f-9ed4-47ac-9323-0f3df47ea4e7",
+      "in_reply_to": "3654d26d-0784-4e89-a138-18516fb71990",
+      "reply_id": "38d99da9-fca6-47fb-85ef-c28b6d28bfe0",
+      "channel": "WEB_CHAT",
+      "status": "ESCALATED",
+      "blocks": [
+        {
+          "type": "TEXT",
+          "text": "Lamentamos lo sucedido. La prueba de entrega de TLX-752190-CO registra «Carga intacta, sin averías.». Tu caso se trata como avería no aparente: tienes hasta el 5 de noviembre de 2026 para radicarlo."
+        },
+        {
+          "type": "REQUEST_ATTACHMENTS",
+          "checklist": [
+            {
+              "codigo": "GUIA",
+              "obligatorio": true,
+              "recibido": true,
+              "descripcion": "Número de guía de transporte (TLX-XXXXXX-CO)."
+            },
+            {
+              "codigo": "FACTURA_COMERCIAL",
+              "obligatorio": true,
+              "recibido": false,
+              "descripcion": "Factura comercial de venta con IVA, o documento equivalente que certifique el costo del producto."
+            },
+            {
+              "codigo": "CARTA_RECLAMACION",
+              "obligatorio": true,
+              "recibido": false,
+              "descripcion": "Carta de reclamación firmada, con el valor exacto reclamado y la descripción de lo ocurrido."
+            }
+          ]
+        },
+        {
+          "type": "PQRS_TICKET",
+          "ticket_id": "cc8c7dc6-36e3-4e7e-bb00-ce8a2c669b69",
+          "estado": "ESCALADO",
+          "faltantes": ["FACTURA_COMERCIAL", "CARTA_RECLAMACION", "CERTIFICACION_BANCARIA"]
+        }
+      ],
+      "meta": {
+        "trace_id": "15327022-ecbd-4a63-b64a-11f79aac8fae",
+        "intent": "PQRS",
+        "confidence_score": null,
+        "confidence_method": null,
+        "escalation": {
+          "escalate": true,
+          "primary": {
+            "id_criterio": "CRIT-003",
+            "accion": "ESCALAR_A_DEPARTAMENTO_JURIDICO_Y_PQRS",
+            "accion_raw": "ESCALAR_A_DEPARTAMENTO_JURIDICO_Y_PQRS",
+            "evidencia": "valor_declarado_cop > 5000000 (contexto de reclamación)",
+            "modo": "claim_context"
+          },
+          "triggers": [
+            {
+              "id_criterio": "CRIT-003",
+              "accion": "ESCALAR_A_DEPARTAMENTO_JURIDICO_Y_PQRS",
+              "accion_raw": "ESCALAR_A_DEPARTAMENTO_JURIDICO_Y_PQRS",
+              "evidencia": "valor_declarado_cop > 5000000 (contexto de reclamación)",
+              "modo": "claim_context"
+            }
+          ],
+          "mensaje_cliente": "Dado que el valor reclamado supera el límite de trámite automático en chat ($5,000,000 COP), un gestor senior de PQRS tomará tu caso.",
+          "rules_version": "1.0.2026",
+          "config_snapshot": {
+            "CRIT003_MODE": "claim_context",
+            "CRIT005_MODE": "incident_context",
+            "CONFIDENCE_THRESHOLD": "0.75",
+            "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS",
+            "omitidas": "CRIT-001:sin_respuesta_rag,INFO-INTENTOS:sin_dato"
+          }
+        },
+        "services_called": ["tms", "pqrs", "escalation"],
+        "evidence_ids": ["TLX-752190-CO", "cc8c7dc6-36e3-4e7e-bb00-ce8a2c669b69"],
+        "llm_used": false,
+        "delivery_mode": "SIMULATED"
+      },
+      "created_at": "2026-11-03T13:17:37.698071-05:00"
+    }
+  },
+  "errors": {
+    "sesion_ajena": {
+      "status": 404,
+      "body": {
+        "error": {
+          "code": "NO_ENCONTRADO",
+          "message": "No encontramos el recurso solicitado.",
+          "details": {
+            "recurso": "session"
+          },
+          "request_id": "862ac9aa-7b4c-462a-83ed-8ee36601f28f"
+        }
+      }
+    },
+    "validacion": {
+      "status": 422,
+      "body": {
+        "error": {
+          "code": "VALIDACION",
+          "message": "Revisa los datos enviados: hay campos inválidos o incompletos.",
+          "details": {
+            "campos": [
+              {
+                "loc": ["body"],
+                "msg": "Value error, a message needs text or at least one attachment",
+                "type": "value_error"
+              }
+            ]
+          },
+          "request_id": "85a8b71f-8745-44a4-b63c-28e83e9b8ea2"
+        }
+      }
+    }
+  },
+  "history": {
+    "session_id": "e0d4abfc-cb6a-4c30-9f56-2360d6430435",
+    "channel": "WEB_CHAT",
+    "status": "AWAITING_USER",
+    "messages": [
+      {
+        "message_id": "6ac9ecf4-42fa-4593-9a5a-56b7c6a0cc57",
+        "direction": "INBOUND",
+        "message_type": "TEXT",
+        "text": "Hola",
+        "blocks": null,
+        "delivery_mode": "SIMULATED",
+        "created_at": "2026-11-03T13:17:28.994065-05:00"
+      },
+      {
+        "message_id": "7f5a1e99-c6dc-4d4f-8851-243961f57978",
+        "direction": "OUTBOUND",
+        "message_type": null,
+        "text": "¡Hola! Soy el asistente de TransLogix. Puedo rastrear una guía, cotizar un envío, resolver dudas sobre mercancías especiales o ayudarte a radicar una PQRS.",
+        "blocks": [
+          {
+            "type": "TEXT",
+            "text": "¡Hola! Soy el asistente de TransLogix. Puedo rastrear una guía, cotizar un envío, resolver dudas sobre mercancías especiales o ayudarte a radicar una PQRS."
+          },
+          {
+            "type": "QUICK_REPLIES",
+            "options": [
+              {
+                "id": "rastrear",
+                "title": "Rastrear una guía"
+              },
+              {
+                "id": "cotizar",
+                "title": "Cotizar un envío"
+              },
+              {
+                "id": "asesor",
+                "title": "Hablar con un asesor"
+              }
+            ]
+          }
+        ],
+        "delivery_mode": "SIMULATED",
+        "created_at": "2026-11-03T13:17:28.994065-05:00"
+      },
+      {
+        "message_id": "20fac391-2d7c-4cf0-90c9-ac1c311f0bf5",
+        "direction": "INBOUND",
+        "message_type": "TEXT",
+        "text": "¿Dónde está mi guía TLX-984021-CO?",
+        "blocks": null,
+        "delivery_mode": "SIMULATED",
+        "created_at": "2026-11-03T13:17:29.004216-05:00"
+      }
+    ]
+  },
+  "_fuente": "Capturas reales del backend (FRONTEND_INTEGRATION_EXAMPLES.md, 2026-11-03). Listas recortadas en el documento original."
+}
