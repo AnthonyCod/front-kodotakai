@@ -68,7 +68,8 @@ const RIGHT_TABS: Tab[] = [
 export function UserLayout() {
   return (
     <div className="flex h-dvh flex-col bg-background md:flex-row">
-      <aside className="hidden w-64 shrink-0 flex-col gap-6 border-r bg-sidebar px-4 py-5 md:flex">
+      {/* Barra lateral oculta mientras se rehacen las rutas; para volver a mostrarla: `md:flex`. */}
+      <aside className="hidden w-64 shrink-0 flex-col gap-6 border-r bg-sidebar px-4 py-5">
         <div className="flex items-center gap-3 px-1">
           <img
             src={logiUrl}
@@ -95,8 +96,8 @@ export function UserLayout() {
       </aside>
 
       <main className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex shrink-0 items-center justify-between gap-3 px-3 pt-3 sm:px-6 sm:pt-4 md:justify-end">
-          <div className="flex items-center gap-2.5 md:hidden">
+        <header className="flex shrink-0 items-center justify-between gap-3 px-3 pt-3 sm:px-6 sm:pt-4">
+          <div className="flex items-center gap-2.5">
             <img
               src={logiUrl}
               alt=""
