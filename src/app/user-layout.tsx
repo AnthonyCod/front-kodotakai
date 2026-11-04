@@ -1,8 +1,9 @@
 import type { ComponentType } from 'react'
-import { NavLink, Outlet, useNavigate } from 'react-router'
-import { House, Package } from 'lucide-react'
+import { Link, NavLink, Outlet, useNavigate } from 'react-router'
+import { FileUp, Info, MapPin, Package, Truck } from 'lucide-react'
 import { cn } from 'cn'
 import logiUrl from '@/assets/logi.jpg'
+import { GLASS } from '@/shared/ui/glass'
 import { LiveClock } from '@/shared/ui/live-clock'
 import { LayoutDashboard } from '@/shared/components/animate-ui/icons/hugeicons/layout-dashboard'
 import { BotMessageSquare } from '@/shared/components/animate-ui/icons/hugeicons/bot-message-square'
@@ -56,12 +57,12 @@ interface Tab {
   Icon: Section['Icon']
 }
 const LEFT_TABS: Tab[] = [
-  { to: '/', label: 'Inicio', Icon: House },
-  { to: '/consultas', label: 'Consultas', Icon: Package },
+  { to: '/consultas', label: 'Rastrear', Icon: Truck },
+  { to: '/sucursales', label: 'Sucursales', Icon: MapPin },
 ]
 const RIGHT_TABS: Tab[] = [
-  { to: '/simulador', label: 'WhatsApp', Icon: MessageCircle },
-  { to: '/admin', label: 'Admin', Icon: LayoutDashboard },
+  { to: '/carga-masiva', label: 'Carga masiva', Icon: FileUp },
+  { to: '/info', label: 'Info', Icon: Info },
 ]
 
 /** Escritorio: barra lateral de secciones. Móvil: cabecera con logo y hora, y barra inferior. */
@@ -97,14 +98,33 @@ export function UserLayout() {
 
       <main className="flex min-h-0 min-w-0 flex-1 flex-col">
         <header className="flex shrink-0 items-center justify-between gap-3 px-3 pt-3 sm:px-6 sm:pt-4">
-          <div className="flex items-center gap-2.5">
+          <Link to="/" aria-label="Inicio" className="flex shrink-0 items-center gap-2.5">
             <img
               src={logiUrl}
               alt=""
               className={cn('size-9 -rotate-6 rounded-[22%]', LOGO_SHADOW)}
             />
-            <p className="font-medium tracking-wide">TRANSLOGIX</p>
-          </div>
+            <span className="font-medium tracking-wide">TRANSLOGIX</span>
+          </Link>
+          {/* Escritorio: las mismas opciones de la barra inferior (el logo hace de inicio/chat). */}
+          <nav aria-label="Secciones" className="hidden items-center gap-1 md:flex">
+            {[...LEFT_TABS, ...RIGHT_TABS].map(({ to, label }) => (
+              <NavLink
+                key={to}
+                to={to}
+                className={({ isActive }) =>
+                  cn(
+                    'rounded-full px-4 py-2 text-sm transition',
+                    isActive
+                      ? `${GLASS} font-medium text-brand-deep`
+                      : 'text-muted-foreground hover:text-foreground',
+                  )
+                }
+              >
+                {label}
+              </NavLink>
+            ))}
+          </nav>
           <LiveClock />
         </header>
         <div className="min-h-0 flex-1 overflow-y-auto">

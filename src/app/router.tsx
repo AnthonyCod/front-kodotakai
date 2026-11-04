@@ -6,6 +6,8 @@ import { ChatPage } from '@/pages/chat-page'
 import { MetricsPage } from '@/pages/metrics-page'
 import { QueriesPage } from '@/pages/queries-page'
 import { BranchesPage } from '@/pages/branches-page'
+import { BulkUploadPage } from '@/pages/bulk-upload-page'
+import { InfoPage } from '@/pages/info-page'
 import { InternalLayout } from './internal-layout'
 import { UserLayout } from './user-layout'
 
@@ -18,6 +20,8 @@ export const router = createBrowserRouter([
       { path: '/', element: <ChatPage /> },
       { path: '/consultas', element: <QueriesPage /> },
       { path: '/sucursales', element: <BranchesPage /> },
+      { path: '/carga-masiva', element: <BulkUploadPage /> },
+      { path: '/info', element: <InfoPage /> },
       { path: '/simulador', element: <ChannelSimulatorPage /> },
       // Sin login todavía (por confirmar con el backend).
       { path: '/admin', element: <AdminInsightsPage /> },

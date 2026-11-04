@@ -167,15 +167,15 @@ No se usan logotipos de marcas reales (regla del proyecto), por eso WhatsApp va 
 
 ### Barra lateral (`app/user-layout.tsx`)
 
-| Uso                  | Icono                                                                                    |
-| -------------------- | ---------------------------------------------------------------------------------------- |
-| Chat con Logi        | `bot-message-square`                                                                     |
-| Consultas            | `Package` (lucide)                                                                       |
-| WhatsApp y llamada   | `message-circle`                                                                         |
-| Paso hecho / novedad | `checkmark-circle-02` / `triangle-alert` (tarjeta de rastreo)                            |
-| Administrador        | `layout-dashboard`                                                                       |
-| Barra inferior móvil | `House` (lucide), `Package` (lucide), logo de Logi, `message-circle`, `layout-dashboard` |
-| Reloj de la cabecera | `clock-01` (`shared/ui/live-clock.tsx`)                                                  |
+| Uso                  | Icono                                                                 |
+| -------------------- | --------------------------------------------------------------------- |
+| Chat con Logi        | `bot-message-square`                                                  |
+| Consultas            | `Package` (lucide)                                                    |
+| WhatsApp y llamada   | `message-circle`                                                      |
+| Paso hecho / novedad | `checkmark-circle-02` / `triangle-alert` (tarjeta de rastreo)         |
+| Administrador        | `layout-dashboard`                                                    |
+| Barra inferior móvil | `Truck`, `MapPin`, `FileUp`, `Info` (lucide) y logo de Logi al centro |
+| Reloj de la cabecera | `clock-01` (`shared/ui/live-clock.tsx`)                               |
 
 ### Administrador (`/admin`, feature `business-insights`)
 
