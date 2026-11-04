@@ -135,4 +135,25 @@ export const handlers: RequestHandler[] = [
       messages: session.messages,
     })
   }),
+
+  // Cifras de la captura real Bogotá → Medellín (QUOTE_SUMMARY de chat.json); la ruta repite lo pedido.
+  http.post(api('/cotizar'), async ({ request }) => {
+    const body = (await request.json()) as { origen: string; destino: string }
+    return HttpResponse.json({
+      cotizacion_id: crypto.randomUUID(),
+      ruta: { origen: body.origen, destino: body.destino },
+      calculo: {
+        peso_volumetrico_kg: 45.5,
+        peso_facturable_kg: 45.5,
+        flete_base_cop: 190975,
+        seguro_cop: 0,
+        flete_minimo_aplicado: false,
+        flete_total_cop: 190975,
+      },
+      tiempo_entrega_horas: 24,
+      advertencias: [],
+      supuestos: [],
+      formula_version: 'provisional-v1',
+    })
+  }),
 ]

@@ -201,13 +201,15 @@ No se usan logotipos de marcas reales (regla del proyecto), por eso WhatsApp va 
 El set de Hugeicons de Animate UI **no tiene** camión, paquete, calculadora, báscula ni libro.
 Para esos se usa `lucide-react` (ya instalado, estático):
 
-| Uso                      | Icono lucide |
-| ------------------------ | ------------ |
-| En tránsito / en reparto | `Truck`      |
-| Envío / guía             | `Package`    |
-| Cotizar envío            | `Calculator` |
-| Peso real / volumétrico  | `Scale`      |
-| Normativa                | `BookOpen`   |
+| Uso                       | Icono lucide                              |
+| ------------------------- | ----------------------------------------- |
+| En tránsito / en reparto  | `Truck`                                   |
+| Envío / guía              | `Package`                                 |
+| Cotizar envío             | `Calculator`                              |
+| Peso real / volumétrico   | `Scale`                                   |
+| Normativa                 | `BookOpen`                                |
+| Error de campo o consulta | `CircleAlert` (`FieldError`, `ErrorText`) |
+| Ciudad sugerida           | `MapPin` (`Autocomplete`)                 |
 
 Antes de agregar un icono nuevo, buscarlo en el registro (MCP de shadcn o
 `pnpm dlx shadcn@latest search @animate-ui -q <texto>`) y añadirlo a esta tabla.

@@ -1,15 +1,15 @@
-'use client';
+'use client'
 
-import { motion, type Variants } from 'motion/react';
+import { motion, type Variants } from 'motion/react'
 
 import {
   getVariants,
   useAnimateIconContext,
   IconWrapper,
   type IconProps,
-} from '@animate-ui/react/icons';
+} from '@animate-ui/react/icons'
 
-type Clock01Props = IconProps<keyof typeof animations>;
+type Clock01Props = IconProps<keyof typeof animations>
 
 const animations = {
   default: {
@@ -39,11 +39,11 @@ const animations = {
       },
     },
   } satisfies Record<string, Variants>,
-} as const;
+} as const
 
 function IconComponent({ size, ...props }: Clock01Props) {
-  const { controls } = useAnimateIconContext();
-  const variants = getVariants(animations);
+  const { controls } = useAnimateIconContext()
+  const variants = getVariants(animations)
 
   return (
     <motion.svg
@@ -81,11 +81,11 @@ function IconComponent({ size, ...props }: Clock01Props) {
         animate={controls}
       />
     </motion.svg>
-  );
+  )
 }
 
 function Clock01(props: Clock01Props) {
-  return <IconWrapper icon={IconComponent} {...props} />;
+  return <IconWrapper icon={IconComponent} {...props} />
 }
 
 export {
@@ -94,4 +94,4 @@ export {
   Clock01 as Clock01Icon,
   type Clock01Props,
   type Clock01Props as Clock01IconProps,
-};
+}

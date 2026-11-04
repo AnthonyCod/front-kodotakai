@@ -7,7 +7,7 @@ import { CopyCode } from '@/shared/ui/copy-code'
 import { quoteSummaryBlockSchema, type QuoteSummaryBlock } from '../../api/quote-summary-block'
 import { quoteCode } from '../../model/quote-code'
 
-function QuoteSummary(block: QuoteSummaryBlock) {
+export function QuoteSummary(block: Omit<QuoteSummaryBlock, 'type'>) {
   return (
     <BlockCard>
       <BlockHeader

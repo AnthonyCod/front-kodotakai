@@ -3,3 +3,4 @@ export { quoteSummaryBlockSchema, type QuoteSummaryBlock } from './api/quote-sum
 export { useQuoteDraftStore } from './model/quote-draft-store'
 export { quoteSummaryBlock } from './components/blocks/quote-summary'
 export { QuoteForm } from './components/quote-form'
+export { ShipmentChat } from './components/shipment-chat'

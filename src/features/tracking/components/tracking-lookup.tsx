@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { formatDateTime } from '@/shared/lib/format'
 import { ErrorText } from '@/shared/ui/error-text'
+import { FieldError } from '@/shared/ui/field-error'
 import { FIELD, FIELD_LABEL, PRIMARY_BUTTON, type ResultSummary } from '@/shared/ui/form-styles'
 import { EmptyResult, Metric } from '@/shared/ui/metric'
 import { getTracking } from '../api/tracking-api'
@@ -42,6 +43,7 @@ export function TrackingLookup({ onResult }: { onResult?: (result: ResultSummary
               value={guia}
               onChange={(e) => setGuia(e.target.value.toUpperCase().trim())}
               placeholder="TLX-123456-CO"
+              aria-invalid={(guia !== '' && !valid) || mutation.isError}
               className={FIELD}
             />
             <button
@@ -52,9 +54,7 @@ export function TrackingLookup({ onResult }: { onResult?: (result: ResultSummary
               {mutation.isPending ? 'Buscando…' : 'Rastrear'}
             </button>
           </div>
-          {guia && !valid && (
-            <p className="text-xs text-muted-foreground">Formato: TLX-123456-CO</p>
-          )}
+          {guia && !valid && <FieldError>Formato: TLX-123456-CO</FieldError>}
           <ErrorText error={mutation.error} />
         </form>
 

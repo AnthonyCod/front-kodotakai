@@ -35,9 +35,9 @@ const HOME_BANNERS: {
 }[] = [
   {
     label: 'Hacer envío',
-    description: 'Logi te cotiza en el chat',
+    description: 'Logi te guía paso a paso',
     Icon: PackagePlus,
-    target: { kind: 'send', text: 'Quiero cotizar un envío' },
+    target: { kind: 'link', to: '/hacer-envio' },
   },
   {
     label: 'Ver sucursales',

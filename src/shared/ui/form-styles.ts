@@ -1,7 +1,8 @@
 // Clases comunes de los formularios de Consultas (rastrear, cotizar, PQRS).
 
+/** Campo de texto. Con error (`aria-invalid` o validación nativa tras tocarlo) se ve en rojo. */
 export const FIELD =
-  'w-full rounded-xl border bg-background px-3 py-2 text-base outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20'
+  'w-full rounded-xl border bg-background px-3 py-2 text-base outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 aria-invalid:border-destructive aria-invalid:bg-destructive/5 aria-invalid:focus:ring-destructive/20 user-invalid:border-destructive user-invalid:bg-destructive/5 user-invalid:focus:ring-destructive/20'
 
 export const FIELD_LABEL = 'block text-xs font-medium text-muted-foreground'
 
