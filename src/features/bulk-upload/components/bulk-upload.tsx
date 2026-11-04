@@ -1,12 +1,23 @@
+import { useMutation } from '@tanstack/react-query'
 import { useState, type DragEvent, type ReactNode } from 'react'
 import { ChevronDown, CircleAlert, FileDown, FileSpreadsheet, FileUp } from 'lucide-react'
 import { cn } from 'cn'
 import { formatCop } from '@/shared/lib/format'
 import { StatusDot } from '@/shared/ui/block-card'
+import { ErrorText } from '@/shared/ui/error-text'
 import { FIELD, FIELD_LABEL, PRIMARY_BUTTON } from '@/shared/ui/form-styles'
 import { GLASS } from '@/shared/ui/glass'
+import { createBatch, type BatchResponse } from '../api/batch-api'
+import { itemErrorText } from '../model/batch-errors'
 import { BULK_COLUMNS, MAX_ROWS, type BulkColumnKey } from '../model/bulk-columns'
-import { buildBatch, parseBulkSheet, type BulkRow } from '../model/bulk-rows'
+import {
+  buildBatch,
+  defaultBatchReference,
+  isValidBatchReference,
+  parseBulkSheet,
+  sentLines,
+  type BulkRow,
+} from '../model/bulk-rows'
 import { downloadTemplate } from '../model/template'
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024
@@ -46,8 +57,8 @@ const EXAMPLE_JSON = JSON.stringify(
 type Filter = 'all' | 'errors'
 
 /**
- * Carga masiva: plantilla → archivo → revisión fila por fila → lote JSON.
- * Todo ocurre en el navegador; (por confirmar) el envío al backend espera su endpoint de lotes.
+ * Carga masiva: plantilla → archivo → revisión fila por fila → `POST /shipment-batches`.
+ * La API key de la empresa se escribe aquí y queda solo en memoria (se pierde al recargar).
  */
 export function BulkUpload() {
   const [fileName, setFileName] = useState<string | null>(null)
@@ -58,6 +69,19 @@ export function BulkUpload() {
   const [filter, setFilter] = useState<Filter>('all')
   const [visible, setVisible] = useState(PAGE)
   const [batchRef, setBatchRef] = useState('')
+  const [apiKey, setApiKey] = useState('')
+  const [formError, setFormError] = useState<string | null>(null)
+  const create = useMutation({ mutationFn: createBatch })
+
+  function createShipments() {
+    if (!isValidBatchReference(batchRef))
+      return setFormError(
+        'La referencia del lote: solo letras, números y . _ : / # - (sin espacios).',
+      )
+    if (!apiKey.trim()) return setFormError('Escribe la API key de tu empresa.')
+    setFormError(null)
+    create.mutate({ batch: buildBatch(batchRef, rows), apiKey })
+  }
 
   const valid = rows.filter((row) => row.shipment).length
   const withErrors = rows.length - valid
@@ -67,7 +91,9 @@ export function BulkUpload() {
     if (!file) return
     setFileError(null)
     setRows([])
+    create.reset()
     setFileName(file.name)
+    setBatchRef(defaultBatchReference())
     if (!file.name.toLowerCase().endsWith('.xlsx'))
       return setFileError('El archivo debe ser de Excel (.xlsx). Usa la plantilla.')
     if (file.size > MAX_FILE_BYTES) return setFileError('El archivo supera 5 MB.')
@@ -230,19 +256,38 @@ export function BulkUpload() {
 
       {valid > 0 && (
         <Step number={4} title="Crea los envíos">
-          <label className="block space-y-1">
-            <span className={FIELD_LABEL}>Referencia del lote (opcional)</span>
-            <input
-              value={batchRef}
-              maxLength={40}
-              placeholder="Ej.: PEDIDOS-NOV-04"
-              onChange={(event) => setBatchRef(event.target.value)}
-              className={FIELD}
-            />
-          </label>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="block space-y-1">
+              <span className={FIELD_LABEL}>Referencia del lote</span>
+              <input
+                value={batchRef}
+                maxLength={64}
+                onChange={(event) => setBatchRef(event.target.value)}
+                className={FIELD}
+              />
+            </label>
+            <label className="block space-y-1">
+              <span className={FIELD_LABEL}>API key de tu empresa</span>
+              <input
+                type="password"
+                autoComplete="off"
+                value={apiKey}
+                onChange={(event) => setApiKey(event.target.value)}
+                className={FIELD}
+              />
+            </label>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Si reenvías la misma referencia con el mismo archivo, no se duplican los envíos.
+          </p>
           <div className="grid gap-2 sm:grid-cols-2">
-            <button type="button" disabled className={cn(PRIMARY_BUTTON, 'py-3')}>
-              Crear {valid} envío{valid === 1 ? '' : 's'}
+            <button
+              type="button"
+              disabled={create.isPending || !!create.data}
+              onClick={createShipments}
+              className={cn(PRIMARY_BUTTON, 'py-3')}
+            >
+              {create.isPending ? 'Creando…' : `Crear ${valid} envío${valid === 1 ? '' : 's'}`}
             </button>
             <button
               type="button"
@@ -252,10 +297,13 @@ export function BulkUpload() {
               <FileDown size={16} aria-hidden /> Descargar JSON
             </button>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Crear envíos se activará cuando el servicio de lotes esté listo (por confirmar).
-            Mientras tanto puedes descargar el lote en JSON.
-          </p>
+          {formError && (
+            <p role="alert" className="text-sm text-destructive">
+              {formError}
+            </p>
+          )}
+          <ErrorText error={create.error} />
+          {create.data && <BatchResult result={create.data} lines={sentLines(rows)} />}
         </Step>
       )}
 
@@ -270,8 +318,8 @@ export function BulkUpload() {
         </summary>
         <div className="space-y-4 pb-4 text-sm">
           <p className="text-foreground/80">
-            Tu sistema puede enviarnos los envíos en este formato JSON, con los mismos campos de la
-            plantilla.
+            Tu sistema puede llamar a `POST /api/v1/shipment-batches` con tu API key
+            (`Authorization: Bearer`) y este JSON, con los mismos campos de la plantilla.
           </p>
           <ul className="divide-y rounded-xl bg-card">
             {BULK_COLUMNS.map((column) => (
@@ -288,6 +336,52 @@ export function BulkUpload() {
           </pre>
         </div>
       </details>
+    </div>
+  )
+}
+
+function BatchResult({ result, lines }: { result: BatchResponse; lines: number[] }) {
+  return (
+    <div role="status" className="space-y-3 rounded-xl border p-3 text-sm">
+      <div className="flex flex-wrap gap-x-4 gap-y-1">
+        <StatusDot tone="ok">{result.aceptados} creados</StatusDot>
+        {result.rechazados > 0 && (
+          <StatusDot tone="alert">{result.rechazados} rechazados</StatusDot>
+        )}
+        {result.pendientes > 0 && <span>{result.pendientes} en proceso</span>}
+      </div>
+      <ul className="divide-y">
+        {result.resultados.map((item) => (
+          <li key={item.linea} className="flex items-start justify-between gap-3 py-2">
+            <span className="min-w-0">
+              <span className="block font-medium">
+                Fila {lines[item.linea - 1] ?? item.linea}
+                {item.referencia_cliente && (
+                  <span className="font-normal text-muted-foreground">
+                    {' '}
+                    · {item.referencia_cliente}
+                  </span>
+                )}
+              </span>
+              {item.errores.map((error) => (
+                <span key={error.code + error.field} className="block text-xs text-destructive">
+                  {itemErrorText(error.code, error.field)}
+                </span>
+              ))}
+            </span>
+            {item.numero_guia && (
+              <span className="shrink-0 text-right">
+                <span className="block font-mono text-xs">{item.numero_guia}</span>
+                {item.flete_total_cop !== null && (
+                  <span className="block text-xs text-muted-foreground">
+                    {formatCop(item.flete_total_cop)}
+                  </span>
+                )}
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }

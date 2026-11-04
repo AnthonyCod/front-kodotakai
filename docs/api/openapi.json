@@ -3,7 +3,7 @@
   "info": {
     "title": "TransLogix AI — API pública del MVP",
     "description": "Contrato de integración compartido (dueño: P01). Fuente de verdad junto con los\nmodelos Pydantic de `backend/app/contracts/`; este archivo se **genera**, no se edita.\n\nConvenciones:\n\n* Idioma `es-CO`; fechas ISO-8601 con offset, expresadas en `America/Bogota` (`-05:00`).\n* Dinero: entero en COP. Cálculo interno con `Decimal`, redondeo `ROUND_HALF_UP` por línea.\n* IDs: UUID v4 en string, salvo `numero_guia` (`^TLX-\\d{6}-CO$`).\n* `X-Request-ID` opcional en la petición; la respuesta siempre lo devuelve.\n* Todo error usa el sobre `ErrorEnvelope` con un `code` estable (`x-error-codes` por respuesta).\n",
-    "version": "1.2.0"
+    "version": "1.3.0"
   },
   "paths": {
     "/api/v1/tracking/{guia}": {
@@ -457,6 +457,458 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PbxTurnResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": ["cuentas"],
+        "summary": "Login User",
+        "operationId": "loginUser",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioSesion"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": ["cuentas"],
+        "summary": "Get Session User",
+        "operationId": "getSessionUser",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioSesion"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": ["cuentas"],
+        "summary": "Logout User",
+        "operationId": "logoutUser",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogoutResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tarifas": {
+      "get": {
+        "tags": ["tarifas"],
+        "summary": "List Tariffs",
+        "operationId": "listTariffs",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TarifasResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/tarifas": {
+      "get": {
+        "tags": ["tarifas"],
+        "summary": "List All Tariffs",
+        "operationId": "listAllTariffs",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TarifasResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ]
+      },
+      "post": {
+        "tags": ["tarifas"],
+        "summary": "Create Tariff",
+        "operationId": "createTariff",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TarifaRutaCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TarifaRuta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/tarifas/{codigo_trayecto}": {
+      "patch": {
+        "tags": ["tarifas"],
+        "summary": "Update Tariff",
+        "operationId": "updateTariff",
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "codigo_trayecto",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^TLX-[A-Z]{3}-[A-Z]{3}-\\d{3}$",
+              "title": "Codigo Trayecto"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TarifaRutaUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TarifaRuta"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cotizaciones/{cotizacion_id}/solicitar": {
+      "post": {
+        "tags": ["envíos"],
+        "summary": "Request Shipment",
+        "operationId": "requestShipment",
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cotizacion_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cotizacion Id"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SolicitudEnvio"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/mis-envios": {
+      "get": {
+        "tags": ["envíos"],
+        "summary": "List My Shipments",
+        "operationId": "listMyShipments",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SolicitudesResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/solicitudes": {
+      "get": {
+        "tags": ["envíos"],
+        "summary": "List Shipment Requests",
+        "operationId": "listShipmentRequests",
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "estado",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/EstadoSolicitud"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Estado"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SolicitudesResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/solicitudes/{cotizacion_id}/aprobar": {
+      "post": {
+        "tags": ["envíos"],
+        "summary": "Approve Shipment Request",
+        "operationId": "approveShipmentRequest",
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cotizacion_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cotizacion Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SolicitudEnvio"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/solicitudes/{cotizacion_id}/rechazar": {
+      "post": {
+        "tags": ["envíos"],
+        "summary": "Reject Shipment Request",
+        "operationId": "rejectShipmentRequest",
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cotizacion_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cotizacion Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RechazoRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SolicitudEnvio"
                 }
               }
             }
@@ -1751,6 +2203,11 @@
         "required": ["id_criterio", "accion", "accion_raw", "evidencia", "modo"],
         "title": "EscalationTrigger"
       },
+      "EstadoSolicitud": {
+        "type": "string",
+        "enum": ["PENDIENTE", "APROBADA", "RECHAZADA"],
+        "title": "EstadoSolicitud"
+      },
       "EstadoTicket": {
         "type": "string",
         "enum": ["BORRADOR", "RADICADO", "FUERA_DE_PLAZO", "ESCALADO"],
@@ -2323,6 +2780,41 @@
         "required": ["base_cop", "deducible_pct", "deducible_cop", "flete_devuelto", "estado"],
         "title": "LiquidacionPreliminar"
       },
+      "LoginRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "minLength": 3,
+            "title": "Email",
+            "examples": ["usuario@translogix.test"]
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Password"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": ["email", "password"],
+        "title": "LoginRequest"
+      },
+      "LogoutResponse": {
+        "properties": {
+          "sesion_cerrada": {
+            "type": "boolean",
+            "const": true,
+            "title": "Sesion Cerrada",
+            "default": true
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": ["sesion_cerrada"],
+        "title": "LogoutResponse"
+      },
       "MessageDirection": {
         "type": "string",
         "enum": ["INBOUND", "OUTBOUND"],
@@ -2883,6 +3375,20 @@
         "enum": ["CADENA_FRIO", "MERCANCIA_PELIGROSA"],
         "title": "RecargoCodigo"
       },
+      "RechazoRequest": {
+        "properties": {
+          "motivo": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 3,
+            "title": "Motivo"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": ["motivo"],
+        "title": "RechazoRequest"
+      },
       "ReindexRequest": {
         "properties": {
           "doc_codes": {
@@ -3068,6 +3574,11 @@
         "required": ["type", "checklist"],
         "title": "RequestAttachmentsBlock"
       },
+      "Rol": {
+        "type": "string",
+        "enum": ["USUARIO", "ENCARGADO", "ADMIN"],
+        "title": "Rol"
+      },
       "RutaCotizada": {
         "properties": {
           "codigo_trayecto": {
@@ -3126,6 +3637,128 @@
         "required": ["session_id", "channel", "status", "messages"],
         "title": "SessionHistory"
       },
+      "Solicitante": {
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "title": "Nombre"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": ["nombre", "email"],
+        "title": "Solicitante"
+      },
+      "SolicitudEnvio": {
+        "properties": {
+          "cotizacion_id": {
+            "type": "string",
+            "format": "uuid4",
+            "title": "Cotizacion Id"
+          },
+          "estado": {
+            "$ref": "#/components/schemas/EstadoSolicitud"
+          },
+          "origen": {
+            "type": "string",
+            "title": "Origen"
+          },
+          "destino": {
+            "type": "string",
+            "title": "Destino"
+          },
+          "peso_facturable_kg": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Peso Facturable Kg"
+          },
+          "flete_total_cop": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Flete Total Cop",
+            "description": "Congelado al cotizar; no cambia si la tarifa cambia."
+          },
+          "solicitante": {
+            "$ref": "#/components/schemas/Solicitante"
+          },
+          "solicitado_en": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Solicitado En"
+          },
+          "revisado_en": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revisado En"
+          },
+          "motivo_rechazo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Motivo Rechazo"
+          },
+          "numero_guia": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^TLX-\\d{6}-CO$",
+                "examples": ["TLX-984021-CO"]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numero Guia"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cotizacion_id",
+          "estado",
+          "origen",
+          "destino",
+          "peso_facturable_kg",
+          "flete_total_cop",
+          "solicitante",
+          "solicitado_en",
+          "revisado_en",
+          "motivo_rechazo",
+          "numero_guia"
+        ],
+        "title": "SolicitudEnvio"
+      },
+      "SolicitudesResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SolicitudEnvio"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": ["items"],
+        "title": "SolicitudesResponse"
+      },
       "TarifaAplicada": {
         "properties": {
           "tipo": {
@@ -3145,6 +3778,427 @@
         "required": ["tipo", "cop_por_kg"],
         "title": "TarifaAplicada"
       },
+      "TarifaRuta": {
+        "properties": {
+          "codigo_trayecto": {
+            "type": "string",
+            "pattern": "^TLX-[A-Z]{3}-[A-Z]{3}-\\d{3}$",
+            "title": "Codigo Trayecto",
+            "examples": ["TLX-BOG-MED-001"]
+          },
+          "origen": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Origen"
+          },
+          "departamento_origen": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Departamento Origen"
+          },
+          "destino": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Destino"
+          },
+          "departamento_destino": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Departamento Destino"
+          },
+          "tipo_cobertura": {
+            "$ref": "#/components/schemas/TipoCobertura"
+          },
+          "tarifa_kg_real_cop": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Tarifa Kg Real Cop",
+            "description": "Pesos colombianos (COP), entero."
+          },
+          "tarifa_kg_volumetrico_cop": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Tarifa Kg Volumetrico Cop",
+            "description": "Pesos colombianos (COP), entero."
+          },
+          "divisor_volumetrico": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Divisor Volumetrico",
+            "description": "cm³ por kg volumétrico (4000)."
+          },
+          "flete_minimo_cop": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Flete Minimo Cop",
+            "description": "Pesos colombianos (COP), entero."
+          },
+          "porcentaje_seguro": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Porcentaje Seguro",
+            "description": "Porcentaje: 1.0 = 1 %."
+          },
+          "seguro_minimo_cop": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Seguro Minimo Cop",
+            "description": "Pesos colombianos (COP), entero."
+          },
+          "recargo_cadena_frio_pct": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Recargo Cadena Frio Pct",
+            "description": "Porcentaje: 1.0 = 1 %."
+          },
+          "recargo_mercancia_peligrosa_cop": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Recargo Mercancia Peligrosa Cop",
+            "description": "Pesos colombianos (COP), entero."
+          },
+          "tiempo_entrega_horas": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Tiempo Entrega Horas"
+          },
+          "observaciones": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Observaciones",
+            "default": ""
+          },
+          "activo": {
+            "type": "boolean",
+            "title": "Activo"
+          },
+          "actualizado_en": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Actualizado En"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "codigo_trayecto",
+          "origen",
+          "departamento_origen",
+          "destino",
+          "departamento_destino",
+          "tipo_cobertura",
+          "tarifa_kg_real_cop",
+          "tarifa_kg_volumetrico_cop",
+          "divisor_volumetrico",
+          "flete_minimo_cop",
+          "porcentaje_seguro",
+          "seguro_minimo_cop",
+          "recargo_cadena_frio_pct",
+          "recargo_mercancia_peligrosa_cop",
+          "tiempo_entrega_horas",
+          "observaciones",
+          "activo",
+          "actualizado_en"
+        ],
+        "title": "TarifaRuta"
+      },
+      "TarifaRutaCreate": {
+        "properties": {
+          "codigo_trayecto": {
+            "type": "string",
+            "pattern": "^TLX-[A-Z]{3}-[A-Z]{3}-\\d{3}$",
+            "title": "Codigo Trayecto",
+            "examples": ["TLX-BOG-MED-001"]
+          },
+          "origen": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Origen"
+          },
+          "departamento_origen": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Departamento Origen"
+          },
+          "destino": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Destino"
+          },
+          "departamento_destino": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Departamento Destino"
+          },
+          "tipo_cobertura": {
+            "$ref": "#/components/schemas/TipoCobertura"
+          },
+          "tarifa_kg_real_cop": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Tarifa Kg Real Cop",
+            "description": "Pesos colombianos (COP), entero."
+          },
+          "tarifa_kg_volumetrico_cop": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Tarifa Kg Volumetrico Cop",
+            "description": "Pesos colombianos (COP), entero."
+          },
+          "divisor_volumetrico": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Divisor Volumetrico",
+            "description": "cm³ por kg volumétrico (4000)."
+          },
+          "flete_minimo_cop": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Flete Minimo Cop",
+            "description": "Pesos colombianos (COP), entero."
+          },
+          "porcentaje_seguro": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Porcentaje Seguro",
+            "description": "Porcentaje: 1.0 = 1 %."
+          },
+          "seguro_minimo_cop": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Seguro Minimo Cop",
+            "description": "Pesos colombianos (COP), entero."
+          },
+          "recargo_cadena_frio_pct": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Recargo Cadena Frio Pct",
+            "description": "Porcentaje: 1.0 = 1 %."
+          },
+          "recargo_mercancia_peligrosa_cop": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Recargo Mercancia Peligrosa Cop",
+            "description": "Pesos colombianos (COP), entero."
+          },
+          "tiempo_entrega_horas": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Tiempo Entrega Horas"
+          },
+          "observaciones": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Observaciones",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "codigo_trayecto",
+          "origen",
+          "departamento_origen",
+          "destino",
+          "departamento_destino",
+          "tipo_cobertura",
+          "tarifa_kg_real_cop",
+          "tarifa_kg_volumetrico_cop",
+          "divisor_volumetrico",
+          "flete_minimo_cop",
+          "porcentaje_seguro",
+          "seguro_minimo_cop",
+          "recargo_cadena_frio_pct",
+          "recargo_mercancia_peligrosa_cop",
+          "tiempo_entrega_horas"
+        ],
+        "title": "TarifaRutaCreate"
+      },
+      "TarifaRutaUpdate": {
+        "properties": {
+          "tipo_cobertura": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TipoCobertura"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tarifa_kg_real_cop": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0,
+                "description": "Pesos colombianos (COP), entero."
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tarifa Kg Real Cop"
+          },
+          "tarifa_kg_volumetrico_cop": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0,
+                "description": "Pesos colombianos (COP), entero."
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tarifa Kg Volumetrico Cop"
+          },
+          "divisor_volumetrico": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Divisor Volumetrico"
+          },
+          "flete_minimo_cop": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0,
+                "description": "Pesos colombianos (COP), entero."
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flete Minimo Cop"
+          },
+          "porcentaje_seguro": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "description": "Porcentaje: 1.0 = 1 %."
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Porcentaje Seguro"
+          },
+          "seguro_minimo_cop": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0,
+                "description": "Pesos colombianos (COP), entero."
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seguro Minimo Cop"
+          },
+          "recargo_cadena_frio_pct": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "description": "Porcentaje: 1.0 = 1 %."
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recargo Cadena Frio Pct"
+          },
+          "recargo_mercancia_peligrosa_cop": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0,
+                "description": "Pesos colombianos (COP), entero."
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recargo Mercancia Peligrosa Cop"
+          },
+          "tiempo_entrega_horas": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tiempo Entrega Horas"
+          },
+          "observaciones": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observaciones"
+          },
+          "activo": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activo"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "TarifaRutaUpdate",
+        "description": "Only the fields sent change; ``activo=false`` removes the route from quotes."
+      },
+      "TarifasResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TarifaRuta"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": ["items"],
+        "title": "TarifasResponse"
+      },
       "TextBlock": {
         "properties": {
           "type": {
@@ -3163,6 +4217,11 @@
         "type": "object",
         "required": ["type", "text"],
         "title": "TextBlock"
+      },
+      "TipoCobertura": {
+        "type": "string",
+        "enum": ["Urbana Principal", "Frontera", "Zona ZOMAC", "Trayecto Especial"],
+        "title": "TipoCobertura"
       },
       "TipoNovedad": {
         "type": "string",
@@ -3368,6 +4427,34 @@
           "fuente"
         ],
         "title": "TrackingResponse"
+      },
+      "UsuarioSesion": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid4",
+            "title": "Id"
+          },
+          "nombre": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Nombre"
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "minLength": 3,
+            "title": "Email"
+          },
+          "rol": {
+            "$ref": "#/components/schemas/Rol"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": ["id", "nombre", "email", "rol"],
+        "title": "UsuarioSesion"
       },
       "ValidationError": {
         "properties": {
@@ -3813,6 +4900,12 @@
       }
     },
     "securitySchemes": {
+      "SessionCookie": {
+        "type": "apiKey",
+        "description": "Sesión de usuario (httpOnly). La crea `POST /auth/login` (CR-001).",
+        "in": "cookie",
+        "name": "tlx_session"
+      },
       "AdminToken": {
         "type": "apiKey",
         "description": "Token de administración definido en `ADMIN_TOKEN` (entorno).",

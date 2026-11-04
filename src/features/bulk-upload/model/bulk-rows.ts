@@ -6,9 +6,16 @@ import { BULK_COLUMNS, MAX_ROWS, type BulkColumnKey } from './bulk-columns'
 const text = (missing: string, max: number) =>
   z.string({ error: missing }).trim().min(1, missing).max(max, `Máximo ${max} caracteres.`)
 
-/** Una fila = un envío. Paquete con las reglas de `/cotizar`; destinatario (por confirmar). */
+/** Referencia de pedido y de lote: como `REFERENCE_PATTERN` del backend. */
+export const REFERENCE_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:/#-]{0,63}$/
+const REFERENCE_HINT = 'Solo letras, números y . _ : / # - (sin espacios), máximo 64.'
+
+/** Una fila = un envío (`EnvioLoteItem`): campos de `/cotizar` + referencia y destinatario. */
 const bulkRowSchema = shipmentFormSchema.extend({
-  referencia_cliente: text('Escribe la referencia del pedido.', 40),
+  referencia_cliente: text('Escribe la referencia del pedido.', 64).regex(
+    REFERENCE_PATTERN,
+    REFERENCE_HINT,
+  ),
   destinatario_nombre: text('Escribe el nombre del destinatario.', 80),
   destinatario_telefono: z
     .string({ error: 'Escribe el teléfono del destinatario.' })
@@ -150,10 +157,20 @@ function validateRow(original: Record<BulkColumnKey, string>, line: number): Bul
   return { line, cells, shipment, errors, corrected }
 }
 
-/** JSON del lote propuesto al backend (por confirmar): solo las filas válidas. */
+/** Referencia por defecto, fija para el archivo cargado: reintentar no duplica el lote. */
+export const defaultBatchReference = (date = new Date()) =>
+  `LOTE-${date.toISOString().slice(0, 19).replace(/[-:]/g, '').replace('T', '-')}`
+
+export const isValidBatchReference = (value: string) => REFERENCE_PATTERN.test(value.trim())
+
+/** Cuerpo de `POST /shipment-batches`: solo las filas válidas, en orden (`linea` = posición). */
 export function buildBatch(referenciaLote: string, rows: BulkRow[]) {
   return {
-    referencia_lote: referenciaLote.trim() || undefined,
+    referencia_lote: referenciaLote.trim(),
     envios: rows.flatMap((row) => (row.shipment ? [row.shipment] : [])),
   }
 }
+
+/** Fila de Excel de cada envío enviado: `linea` 1 del lote = primera fila válida. */
+export const sentLines = (rows: BulkRow[]) =>
+  rows.flatMap((row) => (row.shipment ? [row.line] : []))

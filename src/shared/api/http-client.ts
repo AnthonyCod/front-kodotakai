@@ -11,11 +11,14 @@ interface RequestOptions<T> {
   headers?: Record<string, string>
   signal?: AbortSignal
   timeoutMs?: number
+  credentials?: RequestCredentials
 }
 
 export interface CallOptions {
   headers?: Record<string, string>
   signal?: AbortSignal
+  /** `include` en las llamadas con sesión (cookie httpOnly del backend). */
+  credentials?: RequestCredentials
 }
 
 /**
@@ -43,6 +46,7 @@ async function request<T>(path: string, options: RequestOptions<T>): Promise<T> 
         : options.body === undefined
           ? undefined
           : JSON.stringify(options.body),
+      credentials: options.credentials,
       signal,
     })
   } catch (error) {
