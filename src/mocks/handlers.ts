@@ -1,6 +1,7 @@
 import { http, HttpResponse, type RequestHandler } from 'msw'
 import { asesorHandlers, asesorTrackingHandlers } from './asesor-handlers'
 import { chatFixtures, pickScenario } from './scenarios/chat-scenarios'
+import { shipmentBatchHandlers } from './shipment-batches'
 import userFixtures from './fixtures/users.json'
 import envioFixtures from './fixtures/envios.json'
 import batchFixtures from './fixtures/shipment-batches.json'
@@ -285,6 +286,7 @@ export const handlers: RequestHandler[] = [
     })
   }),
 
+  ...shipmentBatchHandlers,
   ...asesorHandlers,
   ...asesorTrackingHandlers,
 ]

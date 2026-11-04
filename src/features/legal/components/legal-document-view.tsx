@@ -3,6 +3,7 @@ import { ArrowLeft } from 'lucide-react'
 import { cn } from 'cn'
 import { InfoPanel } from '@/shared/ui/block-card'
 import { GLASS } from '@/shared/ui/glass'
+import { PAGE_TITLE } from '@/shared/ui/page'
 import { EmptyResult } from '@/shared/ui/metric'
 import { findLegalDocument, type LegalSection } from '../model/documents'
 import { formatLegalDate } from '../model/format-legal-date'
@@ -15,7 +16,7 @@ export function LegalDocumentView({ slug }: { slug: string }) {
 
   if (!doc)
     return (
-      <div className="mx-auto w-full max-w-3xl px-3 py-3 sm:px-6 sm:py-6">
+      <div className="mx-auto w-full max-w-3xl px-4 py-3 sm:px-6 sm:py-6">
         <EmptyResult>
           <div className="space-y-3">
             <p>Este documento no existe.</p>
@@ -28,7 +29,7 @@ export function LegalDocumentView({ slug }: { slug: string }) {
     )
 
   return (
-    <article className="mx-auto w-full max-w-5xl px-3 py-3 sm:px-6 sm:py-6">
+    <article className="mx-auto w-full max-w-5xl px-4 py-3 sm:px-6 sm:py-6">
       <Link
         to="/info"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
@@ -37,7 +38,7 @@ export function LegalDocumentView({ slug }: { slug: string }) {
       </Link>
 
       <header className="mt-3 space-y-3">
-        <h1 className="text-2xl leading-tight font-medium sm:text-3xl">{doc.title}</h1>
+        <h1 className={PAGE_TITLE}>{doc.title}</h1>
         <div className="flex flex-wrap gap-2">
           <span className={CHIP}>Versión {doc.version}</span>
           <span className={CHIP}>Vigente desde {formatLegalDate(doc.effectiveDate)}</span>

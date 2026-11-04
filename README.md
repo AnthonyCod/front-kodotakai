@@ -20,11 +20,12 @@ Abre http://localhost:5173.
 
 ### Variables de entorno
 
-| Variable           | Valor por defecto       | Para qué                                                                                                                                   |
-| ------------------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `VITE_API_URL`     | `/api/v1`               | URL base del API (en producción, la URL pública completa)                                                                                  |
-| `VITE_API_MOCKING` | `true` en dev           | `true` simula el backend con MSW (`src/mocks`); `false` usa el real; `asesor` simula solo el CRM del asesor (CR-007) y el resto va al real |
-| `BACKEND_URL`      | `http://localhost:8000` | Solo dev: a dónde reenvía el proxy de Vite `/api` (no va al bundle)                                                                        |
+| Variable            | Valor por defecto       | Para qué                                                                                                                                   |
+| ------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `VITE_API_URL`      | `/api/v1`               | URL base del API (en producción, la URL pública completa)                                                                                  |
+| `VITE_API_MOCKING`  | `true` en dev           | `true` simula el backend con MSW (`src/mocks`); `false` usa el real; `asesor` simula solo el CRM del asesor (CR-007) y el resto va al real |
+| `BACKEND_URL`       | `http://localhost:8000` | Solo dev: a dónde reenvía el proxy de Vite `/api` (no va al bundle)                                                                        |
+| `VITE_HERE_API_KEY` | (vacío)                 | Mapa de `/sucursales` (HERE Maps JS). Sin ella, imagen fija                                                                                |
 
 ## Scripts
 
@@ -126,6 +127,26 @@ pnpm dlx shadcn@latest add @animate-ui/icons-hugeicons-send-horizontal
   `colorIntensity`, `softness`, `resolutionScale` (bajar a `0.5` si en móvil va lento) y `colors`.
 - Colores por defecto: tokens `--gradient-1..4` en `src/index.css`.
 - Shaders basados en _WebGL Interactive Gradient_ de Codegrid (Experiment 0469), portados a WebGL2.
+
+## Carga masiva (envíos B2B, contrato 1.3.0)
+
+- `/carga-masiva`: plantilla Excel → validación fila por fila en el navegador → `POST /shipment-batches`
+  con `Authorization: Bearer <API key>` e `Idempotency-Key` = `referencia_lote` → resultado por envío
+  (`GET /shipment-batches/{id}/items`, todas las páginas): guía si se creó, motivo si se rechazó.
+- La API key la escribe el cliente empresarial; solo vive en memoria (no se guarda ni se registra).
+- `docs/api/openapi.json` sigue en 1.2.0: los nombres de la respuesta que la guía del backend no detalla
+  (`batch_id`, `numero_guia`, `referencia_cliente` del ítem) están marcados (por confirmar) en
+  `features/bulk-upload/api/batches-api.ts`. Con el 1.3.0: `pnpm api:types` y pasar a `ApiSchemas`.
+- MSW simula el lote (`src/mocks/shipment-batches.ts`): idempotencia, 409, rechazos por ítem y cursor.
+
+## Sucursales (mapa HERE)
+
+- `/sucursales`: mapa de HERE a pantalla completa, un pin por sucursal y una tarjeta que se despliega o
+  minimiza; ◀ ▶ recorren la lista en círculo y el mapa se mueve solo a la sucursal activa.
+- HERE se carga desde su CDN solo en esa pantalla (`shared/lib/here-maps.ts`), no entra al bundle.
+- La key queda visible en el navegador: en el portal de HERE, restríngela en **Trusted domains**
+  (`localhost:5173` y el dominio de producción).
+- Las sucursales (Sincelejo) y sus fotos son de prueba: `features/branches/model/branches.ts` (por confirmar).
 
 ## Voz
 

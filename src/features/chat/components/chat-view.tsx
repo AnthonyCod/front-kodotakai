@@ -1,70 +1,37 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-  type ComponentType,
-  type FormEvent,
-  type ReactNode,
-} from 'react'
-import { Link } from 'react-router'
-import { FileUp, MapPin, Mic, PackagePlus, Square, Volume2, VolumeX } from 'lucide-react'
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { Square } from 'lucide-react'
+import { AnimateIcon } from '@animate-ui/react/icons'
 import { cn } from 'cn'
-import logiUrl from '@/assets/logi.jpg'
+import logiUrl from '@/assets/logi.webp'
 import { ATTACHMENT_LIMITS, uploadAttachment } from '@/features/pqrs'
 import { API_ERROR_MESSAGES, apiErrorMessage, toApiError } from '@/shared/api'
 import { BlockRenderer } from '@/shared/blocks'
 import { useSpeechRecognition } from '@/shared/hooks/use-speech-recognition'
 import { isSpeechSynthesisSupported, stopSpeaking } from '@/shared/lib/speech-synthesis'
 import { Attachment01 } from '@/shared/components/animate-ui/icons/hugeicons/attachment-01'
+import { Mic } from '@/shared/components/animate-ui/icons/hugeicons/mic'
+import { Refresh } from '@/shared/components/animate-ui/icons/hugeicons/refresh'
 import { SendHorizontal } from '@/shared/components/animate-ui/icons/hugeicons/send-horizontal'
-import { GLASS, GLASS_ON_BRAND, GLASS_TINT } from '@/shared/ui/glass'
-import { InteractiveGradient } from '@/shared/ui/interactive-gradient'
+import { VolumeHigh } from '@/shared/components/animate-ui/icons/hugeicons/volume-high'
+import { VolumeOff } from '@/shared/components/animate-ui/icons/hugeicons/volume-off'
+import { GLASS, GLASS_TINT } from '@/shared/ui/glass'
+import { SECONDARY_PILL, SURFACE } from '@/shared/ui/page'
+import { Reveal } from '@/shared/ui/reveal'
 import { RevealContext, SplitText } from '@/shared/ui/split-text'
 import { useChatStore } from '../model/chat-store'
 import { MAX_MESSAGE_LENGTH, useSendMessage } from '../model/use-send-message'
+import { HomeFeatures } from './home-features'
 
 /** El título de bienvenida se revela una sola vez por carga de la página. */
 let titleRevealed = false
 
-/** Accesos del inicio. "Hacer envío" arranca el flujo de cotización con Logi; los otros llevan a su página. */
-const HOME_BANNERS: {
-  label: string
-  description: string
-  Icon: ComponentType<{ className?: string; 'aria-hidden'?: boolean }>
-  target: { kind: 'send'; text: string } | { kind: 'link'; to: string }
-}[] = [
-  {
-    label: 'Hacer envío',
-    description: 'Logi te guía paso a paso',
-    Icon: PackagePlus,
-    target: { kind: 'link', to: '/hacer-envio' },
-  },
-  {
-    label: 'Ver sucursales',
-    description: 'Dónde estamos',
-    Icon: MapPin,
-    target: { kind: 'link', to: '/sucursales' },
-  },
-  {
-    label: 'Carga masiva',
-    description: 'Muchos envíos desde Excel',
-    Icon: FileUp,
-    target: { kind: 'link', to: '/carga-masiva' },
-  },
-]
+/** Opciones de la barra de la caja (voz, nuevo chat). */
+const TOOL_CHIP = cn(
+  SECONDARY_PILL,
+  'shrink-0 px-3 py-1 text-xs text-muted-foreground hover:text-foreground aria-pressed:bg-brand/10 aria-pressed:text-brand-deep',
+)
 
-const BANNER =
-  'flex aspect-square flex-col justify-between rounded-[1.25rem] bg-card p-3 text-left shadow-card transition hover:-translate-y-0.5 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60 sm:aspect-[4/3] sm:rounded-[1.75rem] sm:p-5'
-
-// Objeto estable: el efecto no se reconfigura en cada render. Media resolución = fluido en móvil.
-const GRADIENT_OPTIONS = { resolutionScale: 0.6 }
-
-/** Texto blanco legible sobre el degradado. */
-const ON_BRAND = 'text-brand-foreground [text-shadow:0_1px_2px_rgb(0_0_0/0.25)]'
-
-const PANEL_PILL = `${GLASS_ON_BRAND} shrink-0 rounded-full px-3 py-1.5 text-xs sm:text-sm`
-
-/** Chat web: historial sobre fondo claro y, abajo, el panel azul con el saludo y la caja de texto. */
+/** Chat web: historial sobre fondo claro y, abajo, la caja de texto (blanca, sin borde, con sombra suave). */
 export function ChatView() {
   const { messages, pending, failed, status, blockedUntil, startNewChat } = useChatStore()
   const hint = useChatStore((s) => s.composerHint)
@@ -84,61 +51,42 @@ export function ChatView() {
   }, [messages.length, pending, failed])
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-5xl flex-col gap-3 px-3 pt-3 pb-3 sm:px-6 sm:pt-6 sm:pb-5">
+    // Una columna a escala de la pantalla. En escritorio, antes de empezar, saludo + accesos + caja
+    // quedan juntos al centro; al empezar, la caja baja y la conversación ocupa el resto.
+    <div
+      className={cn(
+        'mx-auto flex h-full w-full max-w-3xl flex-col gap-3 px-4 pt-3 pb-3 sm:px-6 sm:pt-5 sm:pb-5',
+        !started && 'md:justify-center md:gap-6',
+      )}
+    >
       <div
-        className="min-h-0 flex-1 space-y-5 overflow-y-auto pr-1 sm:space-y-7 [&_[data-block=text]]:text-[15px] [&_[data-block=text]]:leading-relaxed [&_[data-block=text]]:text-foreground/80 sm:[&_[data-block=text]]:text-base"
+        className={cn(
+          'min-h-0 flex-1 space-y-5 overflow-y-auto pr-1 sm:space-y-6 [&_[data-block=text]]:text-[15px] [&_[data-block=text]]:leading-relaxed [&_[data-block=text]]:text-foreground/80',
+          !started && 'md:flex-initial',
+        )}
         aria-live="polite"
       >
         {!started && (
-          <div className="flex min-h-full flex-col items-center justify-center gap-4 py-2 text-center">
+          <div className="flex min-h-full flex-col items-center justify-center gap-3 py-2 text-center">
             <img
               src={logiUrl}
               alt="Logi, asistente de TransLogix"
-              className="size-14 rounded-[22%] shadow-card sm:size-16"
+              className="size-14 drop-shadow-[0_8px_16px_rgb(30_58_138/0.25)] sm:size-16"
             />
             <SplitText
               as="h1"
               animate={revealTitle}
               text="¡Hola! Soy Logi, tu asistente de TransLogix, ¿en qué puedo ayudarte?"
-              className="max-w-2xl text-xl leading-snug font-medium text-balance sm:text-3xl"
+              className="max-w-md text-xl leading-snug font-semibold tracking-tight text-balance sm:text-2xl"
             />
-            <ul className="grid w-full max-w-3xl grid-cols-3 gap-2 pt-2 sm:gap-4">
-              {HOME_BANNERS.map(({ label, description, Icon, target }) => {
-                const content = (
-                  <>
-                    <span className="grid size-10 place-items-center rounded-full bg-muted text-foreground/70 sm:size-12">
-                      <Icon className="size-5 sm:size-6" aria-hidden />
-                    </span>
-                    <span>
-                      <span className="block text-sm leading-tight font-medium sm:text-lg">
-                        {label}
-                      </span>
-                      <span className="hidden text-sm text-muted-foreground sm:block">
-                        {description}
-                      </span>
-                    </span>
-                  </>
-                )
-                return (
-                  <li key={label}>
-                    {target.kind === 'send' ? (
-                      <button
-                        type="button"
-                        disabled={pending}
-                        onClick={() => void send(target.text)}
-                        className={cn(BANNER, 'w-full')}
-                      >
-                        {content}
-                      </button>
-                    ) : (
-                      <Link to={target.to} className={BANNER}>
-                        {content}
-                      </Link>
-                    )}
-                  </li>
-                )
-              })}
-            </ul>
+            <Reveal order={2}>
+              <p className="max-w-sm text-sm text-muted-foreground">
+                Rastrea, cotiza y resuelve tus envíos en un solo chat.
+              </p>
+            </Reveal>
+            <div className="w-full pt-4">
+              <HomeFeatures />
+            </div>
           </div>
         )}
 
@@ -174,60 +122,52 @@ export function ChatView() {
         {failed && (
           <AssistantRow>
             <div
-              className="space-y-2 rounded-2xl border border-destructive/30 bg-card p-3 text-sm shadow-card"
+              className="space-y-2 rounded-2xl border border-destructive/30 bg-card p-3 text-sm"
               role="alert"
             >
               <p>{failed.errorMessage ?? API_ERROR_MESSAGES[failed.errorKind]}</p>
               {failed.errorKind !== 'rate_limited' && (
-                <button
-                  type="button"
-                  className={`${GLASS} rounded-full px-3 py-1.5`}
-                  onClick={retry}
-                >
+                <button type="button" className={SECONDARY_PILL} onClick={retry}>
                   Reintentar
                 </button>
               )}
             </div>
           </AssistantRow>
         )}
-        <div ref={endRef} />
+        {/* Sin conversación no hay a dónde bajar (y su margen desbordaría el inicio). */}
+        {started && <div ref={endRef} />}
       </div>
 
-      <section className="relative shrink-0 overflow-hidden rounded-[1.75rem] bg-brand-deep p-2 shadow-card sm:rounded-[2.25rem] sm:p-3">
-        <InteractiveGradient options={GRADIENT_OPTIONS} />
-        {/* Viñeta: bordes azul profundo y brillo al centro, como el diseño de Logi. */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_80%,transparent_10%,var(--brand-deep)_100%)] opacity-90"
+      <section
+        className={cn(
+          SURFACE,
+          'shrink-0 shadow-[0_1px_2px_rgb(15_23_42/0.04),0_8px_24px_rgb(15_23_42/0.06)]',
+        )}
+      >
+        {/* Solo la pregunta de una sugerencia (p. ej. el número de guía) o el aviso de asesor. */}
+        {!started && hint && <p className="px-4 pt-3 text-sm text-muted-foreground">{hint}</p>}
+        {started && status === 'ESCALATED' && (
+          <p className="px-4 pt-3 text-sm text-brand-deep">
+            Tu caso está con un asesor. Puedes seguir escribiendo aquí.
+          </p>
+        )}
+        <Composer
+          disabled={pending || blockedUntil !== null}
+          onSend={send}
+          tools={
+            <>
+              <VoiceRepliesToggle />
+              {started && (
+                <AnimateIcon animateOnHover asChild>
+                  <button type="button" className={TOOL_CHIP} onClick={startNewChat}>
+                    <Refresh size={14} aria-hidden />
+                    Nuevo chat
+                  </button>
+                </AnimateIcon>
+              )}
+            </>
+          }
         />
-
-        <div className="relative flex flex-col gap-2 px-2 pt-1 pb-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:px-3 sm:pt-2 sm:pb-3">
-          {/* Solo la pregunta de una sugerencia (p. ej. el número de guía); si no, solo botones. */}
-          {!started && hint && <p className={cn('text-sm sm:text-base', ON_BRAND)}>{hint}</p>}
-          {started && status === 'ESCALATED' && (
-            <p className={cn('text-sm sm:text-base', ON_BRAND)}>
-              Tu caso está con un asesor. Puedes seguir escribiendo aquí.
-            </p>
-          )}
-          <div className="flex shrink-0 gap-2 overflow-x-auto sm:ml-auto">
-            <VoiceRepliesToggle />
-            <button
-              type="button"
-              className={PANEL_PILL}
-              disabled={pending}
-              onClick={() => void send('Quiero hablar con un asesor')}
-            >
-              Hablar con un asesor
-            </button>
-            {started && (
-              <button type="button" className={PANEL_PILL} onClick={startNewChat}>
-                Nuevo chat
-              </button>
-            )}
-          </div>
-        </div>
-
-        <Composer disabled={pending || blockedUntil !== null} onSend={send} />
       </section>
     </div>
   )
@@ -237,20 +177,28 @@ export function ChatView() {
 function AssistantRow({ children }: { children: ReactNode }) {
   return (
     <div className="flex items-start gap-2.5 sm:gap-4">
-      <img src={logiUrl} alt="" className="size-8 shrink-0 rounded-[22%] shadow-card sm:size-11" />
+      <img src={logiUrl} alt="" className="size-8 shrink-0 sm:size-10" />
       <div className="max-w-full min-w-0 flex-1 space-y-3 sm:max-w-[85%]">{children}</div>
     </div>
   )
 }
 
-const ACTION_BUTTON = `${GLASS_TINT} size-10 shrink-0 rounded-xl sm:size-12 sm:rounded-2xl`
+// Botones redondos de vidrio; el icono se anima al pasar el cursor por todo el botón.
+const ICON_BUTTON = cn(
+  GLASS,
+  'size-9 shrink-0 rounded-full text-muted-foreground hover:text-foreground aria-pressed:bg-brand/10 aria-pressed:text-brand-deep',
+)
+const SEND_BUTTON = cn(GLASS_TINT, 'size-9 shrink-0 rounded-full disabled:opacity-35')
 
 function Composer({
   disabled,
   onSend,
+  tools,
 }: {
   disabled: boolean
   onSend: ReturnType<typeof useSendMessage>['send']
+  /** Opciones a la izquierda de la barra (voz, nuevo chat). */
+  tools?: ReactNode
 }) {
   const [text, setText] = useState('')
   const [uploading, setUploading] = useState(false)
@@ -304,10 +252,7 @@ function Composer({
   }
 
   return (
-    <form
-      onSubmit={submit}
-      className="relative mt-1 rounded-[1.25rem] bg-card p-2.5 pl-3.5 text-card-foreground shadow-card sm:rounded-[1.75rem] sm:p-4"
-    >
+    <form onSubmit={submit} className="p-2.5 pl-4 sm:p-3 sm:pl-4">
       <label htmlFor="composer" className="sr-only">
         Mensaje para Logi
       </label>
@@ -322,7 +267,7 @@ function Composer({
             ? dictation.interim || 'Te escucho…'
             : (hint ?? '¿Qué paquete movemos hoy? Dime en qué puedo ayudarte')
         }
-        className="block [field-sizing:content] max-h-40 min-h-10 w-full resize-none bg-transparent text-base outline-none placeholder:text-muted-foreground sm:min-h-14 sm:text-lg"
+        className="block [field-sizing:content] max-h-40 min-h-9 w-full resize-none bg-transparent pt-1 text-base outline-none placeholder:text-muted-foreground sm:min-h-11 sm:text-[15px]"
         onChange={(event) => setText(event.target.value)}
         onKeyDown={(event) => {
           if (event.key === 'Enter' && !event.shiftKey) submit(event)
@@ -338,7 +283,8 @@ function Composer({
           {uploadError}
         </p>
       )}
-      <div className="mt-1 flex items-center justify-end gap-2 sm:mt-2 sm:gap-3">
+      <div className="mt-1 flex items-center gap-1.5">
+        <div className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto">{tools}</div>
         <input
           ref={fileRef}
           type="file"
@@ -347,42 +293,52 @@ function Composer({
           onChange={(event) => void attach(event.target.files?.[0])}
         />
         {dictation.supported && (
+          <AnimateIcon animateOnHover asChild>
+            <button
+              type="button"
+              aria-label={dictation.listening ? 'Dejar de escuchar' : 'Hablar'}
+              aria-pressed={dictation.listening}
+              disabled={disabled}
+              className={cn(ICON_BUTTON, dictation.listening && 'animate-pulse')}
+              onClick={() => {
+                stopSpeaking()
+                if (dictation.listening) dictation.stop()
+                else dictation.start()
+              }}
+            >
+              {dictation.listening ? (
+                <Square size={15} aria-hidden />
+              ) : (
+                <Mic size={18} aria-hidden />
+              )}
+            </button>
+          </AnimateIcon>
+        )}
+        <AnimateIcon animateOnHover asChild>
           <button
             type="button"
-            aria-label={dictation.listening ? 'Dejar de escuchar' : 'Hablar'}
-            aria-pressed={dictation.listening}
-            disabled={disabled}
-            className={cn(ACTION_BUTTON, dictation.listening && 'animate-pulse')}
-            onClick={() => {
-              stopSpeaking()
-              if (dictation.listening) dictation.stop()
-              else dictation.start()
-            }}
+            aria-label="Adjuntar archivo (PDF o JPG)"
+            disabled={disabled || uploading}
+            className={ICON_BUTTON}
+            onClick={() => fileRef.current?.click()}
           >
-            {dictation.listening ? <Square size={18} /> : <Mic size={22} />}
+            <Attachment01
+              size={18}
+              aria-hidden
+              className={uploading ? 'animate-pulse' : undefined}
+            />
           </button>
-        )}
-        <button
-          type="button"
-          aria-label="Adjuntar archivo (PDF o JPG)"
-          disabled={disabled || uploading}
-          className={ACTION_BUTTON}
-          onClick={() => fileRef.current?.click()}
-        >
-          <Attachment01
-            size={22}
-            animateOnHover
-            className={uploading ? 'animate-pulse' : undefined}
-          />
-        </button>
-        <button
-          type="submit"
-          aria-label="Enviar"
-          disabled={disabled || !text.trim()}
-          className={ACTION_BUTTON}
-        >
-          <SendHorizontal size={22} animateOnHover />
-        </button>
+        </AnimateIcon>
+        <AnimateIcon animateOnHover asChild>
+          <button
+            type="submit"
+            aria-label="Enviar"
+            disabled={disabled || !text.trim()}
+            className={SEND_BUTTON}
+          >
+            <SendHorizontal size={17} aria-hidden />
+          </button>
+        </AnimateIcon>
       </div>
     </form>
   )
@@ -395,17 +351,19 @@ function VoiceRepliesToggle() {
   if (!isSpeechSynthesisSupported()) return null
 
   return (
-    <button
-      type="button"
-      aria-pressed={voiceReplies}
-      className={PANEL_PILL}
-      onClick={() => {
-        if (voiceReplies) stopSpeaking()
-        setVoiceReplies(!voiceReplies)
-      }}
-    >
-      {voiceReplies ? <Volume2 size={16} /> : <VolumeX size={16} />}
-      {voiceReplies ? 'Voz activada' : 'Voz'}
-    </button>
+    <AnimateIcon animateOnHover asChild>
+      <button
+        type="button"
+        aria-pressed={voiceReplies}
+        className={TOOL_CHIP}
+        onClick={() => {
+          if (voiceReplies) stopSpeaking()
+          setVoiceReplies(!voiceReplies)
+        }}
+      >
+        {voiceReplies ? <VolumeHigh size={14} aria-hidden /> : <VolumeOff size={14} aria-hidden />}
+        {voiceReplies ? 'Voz activada' : 'Voz'}
+      </button>
+    </AnimateIcon>
   )
 }

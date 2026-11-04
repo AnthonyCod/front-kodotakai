@@ -17,6 +17,8 @@ interface RequestOptions<T> {
 export interface CallOptions {
   headers?: Record<string, string>
   signal?: AbortSignal
+  /** Por defecto 20 s. Más para lo que el backend procesa dentro de la petición (lotes). */
+  timeoutMs?: number
   /** `include` en las llamadas con sesión (cookie httpOnly del backend). */
   credentials?: RequestCredentials
 }
