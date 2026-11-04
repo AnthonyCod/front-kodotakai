@@ -17,7 +17,7 @@ import { addNote, getLead, type CallResult, type LeadDetail } from '../api/crm-a
 import { caseMessage, quoteMessage, telLink, whatsappLink } from '../model/contact'
 import { formatDayTime, formatTime, useNow } from '../model/time'
 import { crmKeys, useAdvisor, useFunnel } from '../model/use-crm'
-import { shortStage } from '../model/funnels'
+import { isLockedStage, shortStage } from '../model/funnels'
 import { useToasts } from '../model/toast-store'
 import { MoveStageSheet } from './move-stage-sheet'
 import { TmsTrackingSection } from './tms-tracking'
@@ -127,6 +127,8 @@ function DetailHeader({ lead, onClose }: { lead: LeadDetail; onClose: () => void
   const [copied, setCopied] = useState(false)
   const stages = funnel.data?.etapas
   const stageName = stages?.find((s) => s.id === lead.etapa)?.nombre ?? lead.etapa
+  // Ventas: venta cerrada y descartado ya no se mueven desde aquí (CR-007).
+  const locked = lead.embudo === 'ventas' && isLockedStage(lead.etapa)
   const advisorName = advisor.data?.nombre ?? ''
 
   const message = lead.cotizacion
@@ -170,7 +172,7 @@ function DetailHeader({ lead, onClose }: { lead: LeadDetail; onClose: () => void
         </div>
         <button
           type="button"
-          disabled={!stages}
+          disabled={!stages || locked}
           onClick={() => setMoving(true)}
           aria-label={`Etapa: ${stageName}. Cambiar etapa`}
           className="flex h-10 max-w-[10rem] shrink-0 items-center gap-1.5 rounded-lg border bg-card px-3 text-sm font-medium lg:max-w-[13rem]"
@@ -179,14 +181,16 @@ function DetailHeader({ lead, onClose }: { lead: LeadDetail; onClose: () => void
             <span className="lg:hidden">{shortStage(stageName)}</span>
             <span className="hidden lg:inline">{stageName}</span>
           </span>
-          <ChevronDown className="size-4 shrink-0 text-muted-foreground" {...ICON} />
+          {!locked && <ChevronDown className="size-4 shrink-0 text-muted-foreground" {...ICON} />}
         </button>
         {moving && stages && (
           <MoveStageSheet
             leadId={lead.lead_id}
             current={lead.etapa}
+            version={lead.version}
             stages={stages}
             subtitle={`${lead.cliente.nombre} · ${lead.referencia}`}
+            client={lead.cliente}
             onClose={() => setMoving(false)}
           />
         )}

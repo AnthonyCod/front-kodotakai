@@ -15,7 +15,7 @@ import {
 import { cn } from 'cn'
 import type { BotCard, CaseCard, FunnelCard, SalesCard } from '../api/crm-api'
 import { quoteMessage, telLink, whatsappLink } from '../model/contact'
-import { confidenceLabel } from '../model/funnels'
+import { POSTVENTA_LABEL, STAGE, confidenceLabel, isLockedStage } from '../model/funnels'
 import { formatAgo, slaRemaining } from '../model/time'
 import { ActionButton, ActionLink, Badge, Card } from './ui'
 import { TONE_TEXT, copLabel } from '../model/tones'
@@ -175,15 +175,26 @@ function SalesCardView({ card, advisorName, now, selected, onOpen, onMove }: Car
           </span>
         </ActionLink>
       </div>
-      <ActionButton
-        className="w-full"
-        onClick={(e) => {
-          stop(e)
-          onMove()
-        }}
-      >
-        <ChevronDown {...ICON} /> Mover etapa
-      </ActionButton>
+      {card.numero_guia ? (
+        <p className="flex flex-wrap items-center gap-2 text-xs">
+          <Badge tone="success" className="font-semibold tabular-nums">
+            <Truck className="size-3.5" {...ICON} /> {card.numero_guia}
+          </Badge>
+          {card.postventa && <Badge tone="neutral">{POSTVENTA_LABEL[card.postventa]}</Badge>}
+        </p>
+      ) : (
+        !isLockedStage(card.etapa) && (
+          <ActionButton
+            className="w-full"
+            onClick={(e) => {
+              stop(e)
+              onMove()
+            }}
+          >
+            <ChevronDown {...ICON} /> Mover etapa
+          </ActionButton>
+        )
+      )}
     </CardShell>
   )
 }
@@ -207,7 +218,7 @@ function CaseCardView({ card, now, selected, onOpen }: CardProps<CaseCard>) {
   const priority = PRIORITY[card.prioridad]
   const confidence = confidenceLabel(card.confianza)
   const sla = card.sla_vence_at ? slaRemaining(card.sla_vence_at, now) : null
-  const resolved = card.etapa === 'resuelto'
+  const resolved = card.etapa === STAGE.casoResuelto
 
   return (
     <CardShell selected={selected} onOpen={onOpen} label={`caso ${card.caso_codigo}`}>

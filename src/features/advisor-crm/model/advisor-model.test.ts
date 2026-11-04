@@ -1,5 +1,5 @@
 import { phoneDigits, quoteMessage, telLink, whatsappLink } from './contact'
-import { confidenceLabel, shortStage } from './funnels'
+import { confidenceLabel, isLockedStage, shortStage } from './funnels'
 import { formatAgo, slaRemaining } from './time'
 import { copLabel } from './tones'
 
@@ -71,5 +71,13 @@ describe('textos de embudo', () => {
     expect(confidenceLabel(0.42).hint).toBe('Requiere humano')
     expect(confidenceLabel(0.55).tone).toBe('warning')
     expect(confidenceLabel(0.88).level).toBe('Confianza IA alta')
+  })
+})
+
+describe('etapas acordadas con el backend (CR-007)', () => {
+  it('bloquea mover desde venta cerrada y descartado', () => {
+    expect(isLockedStage('VENTA_CERRADA')).toBe(true)
+    expect(isLockedStage('DESCARTADO')).toBe(true)
+    expect(isLockedStage('NEGOCIACION')).toBe(false)
   })
 })

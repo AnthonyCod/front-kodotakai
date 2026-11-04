@@ -54,3 +54,19 @@ export function confidenceLabel(confianza: number) {
 
 /** Nombre corto de etapa para espacios estrechos: «En Contacto / Llamada» → «En Contacto». */
 export const shortStage = (name: string) => name.split(/ \(| \/ /)[0]
+
+/** Etapas acordadas con el backend (CR-007) que cambian el comportamiento de la UI. */
+export const STAGE = {
+  ventaCerrada: 'VENTA_CERRADA',
+  descartado: 'DESCARTADO',
+  casoResuelto: 'RESUELTO',
+} as const
+
+/** Desde aquí el asesor ya no mueve el lead: la venta cerrada emitió guía y descartado es final. */
+export const isLockedStage = (stage: string) =>
+  stage === STAGE.ventaCerrada || stage === STAGE.descartado
+
+export const POSTVENTA_LABEL = {
+  ENTREGADO_A_AGENCIA: 'Entregado a agencia',
+  CERRADO: 'Cerrado',
+} as const

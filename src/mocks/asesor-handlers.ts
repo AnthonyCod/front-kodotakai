@@ -12,23 +12,23 @@ type Funnel = 'ventas' | 'casos' | 'bot'
 
 const STAGES: Record<Funnel, { id: string; nombre: string }[]> = {
   ventas: [
-    { id: 'nuevas', nombre: 'Nuevas Cotizaciones (Bot)' },
-    { id: 'contacto', nombre: 'En Contacto / Llamada' },
-    { id: 'negociacion', nombre: 'Negociación B2B/B2C' },
-    { id: 'cerrada', nombre: 'Venta Cerrada (Guía Creada)' },
-    { id: 'descartada', nombre: 'Descartada' },
+    { id: 'NUEVA_COTIZACION', nombre: 'Nuevas Cotizaciones (Bot)' },
+    { id: 'EN_CONTACTO', nombre: 'En Contacto / Llamada' },
+    { id: 'NEGOCIACION', nombre: 'Negociación B2B/B2C' },
+    { id: 'VENTA_CERRADA', nombre: 'Venta Cerrada (Guía Creada)' },
+    { id: 'DESCARTADO', nombre: 'Descartada' },
   ],
   casos: [
-    { id: 'escalados', nombre: 'Escalados por IA (Prioritarios)' },
-    { id: 'gestion', nombre: 'En Gestión Humana' },
-    { id: 'validando', nombre: 'Validando con Operaciones' },
-    { id: 'resuelto', nombre: 'Resuelto' },
+    { id: 'ESCALADO_IA', nombre: 'Escalados por IA (Prioritarios)' },
+    { id: 'EN_GESTION', nombre: 'En Gestión Humana' },
+    { id: 'VALIDANDO_OPS', nombre: 'Validando con Operaciones' },
+    { id: 'RESUELTO', nombre: 'Resuelto' },
   ],
   bot: [
-    { id: 'nutricion', nombre: 'Bot: Nutrición Inicial (Enviado resumen)' },
-    { id: 'recordatorio', nombre: 'Bot: Recordatorio 24h (Esperando respuesta)' },
-    { id: 'reactivado', nombre: 'Bot: Reactivado por Cliente (Listo para Asesor)' },
-    { id: 'expirado', nombre: 'Expirado sin respuesta' },
+    { id: 'NUTRICION', nombre: 'Bot: Nutrición Inicial (Enviado resumen)' },
+    { id: 'RECORDATORIO_24H', nombre: 'Bot: Recordatorio 24h (Esperando respuesta)' },
+    { id: 'REACTIVADO', nombre: 'Bot: Reactivado por Cliente (Listo para Asesor)' },
+    { id: 'EXPIRADO', nombre: 'Expirado sin respuesta' },
   ],
 }
 
@@ -65,6 +65,9 @@ interface Lead {
     proxima_accion: string
   }
   guia: string | null
+  /** Concurrencia optimista (CR-007): sube con cada cambio. */
+  version: number
+  postventa?: 'ENTREGADO_A_AGENCIA' | 'CERRADO' | null
   notas: Note[]
   transcripcion?: { rol: 'BOT' | 'CLIENTE'; texto: string; timestamp: string }[]
 }
@@ -113,6 +116,7 @@ const sale = (
   segmento,
   cotizacion: q,
   guia: null,
+  version: 1,
   notas: [
     sysNote(
       `Lead creado por el bot web al capturar el teléfono (cotización ${q.codigo}).`,
@@ -125,7 +129,7 @@ const sale = (
 const leads: Lead[] = [
   sale(
     'L-99201',
-    'nuevas',
+    'NUEVA_COTIZACION',
     8,
     'María González',
     '+57 310 456 7890',
@@ -203,7 +207,7 @@ const leads: Lead[] = [
       ],
     },
   ),
-  sale('L-99198', 'nuevas', 21, 'Camilo Restrepo', '+57 300 218 4471', 'B2C', {
+  sale('L-99198', 'NUEVA_COTIZACION', 21, 'Camilo Restrepo', '+57 300 218 4471', 'B2C', {
     codigo: 'COT-99198',
     origen: 'Bogotá',
     destino: 'Medellín',
@@ -213,7 +217,7 @@ const leads: Lead[] = [
   }),
   sale(
     'L-99195',
-    'nuevas',
+    'NUEVA_COTIZACION',
     47,
     'Distribuidora La 14 S.A.S.',
     '+57 315 220 4418',
@@ -228,7 +232,7 @@ const leads: Lead[] = [
     },
     { empresa: 'Distribuidora La 14 S.A.S.' },
   ),
-  sale('L-99190', 'contacto', 72, 'Luz Marina Pardo', '+57 304 771 3350', 'B2C', {
+  sale('L-99190', 'EN_CONTACTO', 72, 'Luz Marina Pardo', '+57 304 771 3350', 'B2C', {
     codigo: 'COT-99190',
     origen: 'Cali',
     destino: 'Bogotá',
@@ -238,7 +242,7 @@ const leads: Lead[] = [
   }),
   sale(
     'L-99185',
-    'contacto',
+    'EN_CONTACTO',
     120,
     'Julián Mazuera',
     '+57 311 640 2287',
@@ -255,7 +259,7 @@ const leads: Lead[] = [
   ),
   sale(
     'L-99180',
-    'negociacion',
+    'NEGOCIACION',
     190,
     'Sergio Cárdenas',
     '+57 318 554 0290',
@@ -270,7 +274,7 @@ const leads: Lead[] = [
     },
     { empresa: 'Ferreléctricos del Norte S.A.S.' },
   ),
-  sale('L-99172', 'negociacion', 260, 'Valentina Ríos', '+57 302 117 8843', 'B2C', {
+  sale('L-99172', 'NEGOCIACION', 260, 'Valentina Ríos', '+57 302 117 8843', 'B2C', {
     codigo: 'COT-99172',
     origen: 'Pereira',
     destino: 'Bogotá',
@@ -280,7 +284,7 @@ const leads: Lead[] = [
   }),
   sale(
     'L-99150',
-    'cerrada',
+    'VENTA_CERRADA',
     1440,
     'Hernando Gil',
     '+57 317 902 3361',
@@ -293,9 +297,13 @@ const leads: Lead[] = [
       peso_kg: 210,
       tipo_carga: 'Mercancía General',
     },
-    { guia: 'TLX-200417-CO', empresa: 'Café Santandereano S.A.S.' },
+    {
+      guia: 'TLX-200417-CO',
+      postventa: 'ENTREGADO_A_AGENCIA',
+      empresa: 'Café Santandereano S.A.S.',
+    },
   ),
-  sale('L-99141', 'descartada', 2880, 'Paula Méndez', '+57 301 448 2205', 'B2C', {
+  sale('L-99141', 'DESCARTADO', 2880, 'Paula Méndez', '+57 301 448 2205', 'B2C', {
     codigo: 'COT-99141',
     origen: 'Cartagena',
     destino: 'Cali',
@@ -309,7 +317,7 @@ const leads: Lead[] = [
     [
       [
         '8921',
-        'escalados',
+        'ESCALADO_IA',
         'ALTA',
         'Novedad documental en ruta',
         'TLX-310482-CO',
@@ -320,7 +328,7 @@ const leads: Lead[] = [
       ],
       [
         '8917',
-        'escalados',
+        'ESCALADO_IA',
         'ALTA',
         'Consulta de carga refrigerada (2 a 8 °C)',
         'TLX-984021-CO',
@@ -331,7 +339,7 @@ const leads: Lead[] = [
       ],
       [
         '8905',
-        'gestion',
+        'EN_GESTION',
         'MEDIA',
         'Reclamo por retraso en entrega Medellín a Cali',
         'TLX-752190-CO',
@@ -342,7 +350,7 @@ const leads: Lead[] = [
       ],
       [
         '8899',
-        'gestion',
+        'EN_GESTION',
         'BAJA',
         'Cambio de dirección de entrega',
         'TLX-551904-CO',
@@ -353,7 +361,7 @@ const leads: Lead[] = [
       ],
       [
         '8890',
-        'validando',
+        'VALIDANDO_OPS',
         'MEDIA',
         'Daño parcial en embalaje al recibir',
         'TLX-118493-CO',
@@ -364,7 +372,7 @@ const leads: Lead[] = [
       ],
       [
         '8872',
-        'resuelto',
+        'RESUELTO',
         'BAJA',
         'Certificado de entrega solicitado',
         null,
@@ -393,6 +401,7 @@ const leads: Lead[] = [
       sla_vence_at: sla === null ? null : inMin(sla),
     },
     guia,
+    version: 1,
     notas: [sysNote(`Caso escalado por el bot web: ${motivo.toLowerCase()}.`, ago(40))],
     transcripcion: [
       {
@@ -420,7 +429,7 @@ const leads: Lead[] = [
     [
       [
         '99187',
-        'nutricion',
+        'NUTRICION',
         'ACTIVO',
         1,
         'Diego Salcedo',
@@ -432,7 +441,7 @@ const leads: Lead[] = [
       ],
       [
         '99164',
-        'nutricion',
+        'NUTRICION',
         'ACTIVO',
         1,
         'Ferretería El Tornillo S.A.S.',
@@ -444,7 +453,7 @@ const leads: Lead[] = [
       ],
       [
         '99176',
-        'recordatorio',
+        'RECORDATORIO_24H',
         'ACTIVO',
         2,
         'Sandra Ortiz',
@@ -456,7 +465,7 @@ const leads: Lead[] = [
       ],
       [
         '99158',
-        'recordatorio',
+        'RECORDATORIO_24H',
         'ACTIVO',
         2,
         'Rafael Tovar',
@@ -468,7 +477,7 @@ const leads: Lead[] = [
       ],
       [
         '99142',
-        'reactivado',
+        'REACTIVADO',
         'REACTIVADO',
         2,
         'Mariana Lozano',
@@ -480,7 +489,7 @@ const leads: Lead[] = [
       ],
       [
         '99088',
-        'expirado',
+        'EXPIRADO',
         'SIN_RESPUESTA',
         3,
         'Carlos Pineda',
@@ -511,6 +520,7 @@ const leads: Lead[] = [
     },
     bot: { estado, intento, proxima_accion: proxima },
     guia: null,
+    version: 1,
     notas: [sysNote('El bot inició el seguimiento automático de la cotización.', ago(600))],
   })),
 ]
@@ -576,7 +586,7 @@ const tasks: TaskRow[] = [
 ]
 
 const byId = (id: string) => leads.find((l) => l.id === id)
-const open = (l: Lead) => !['cerrada', 'descartada', 'resuelto', 'expirado'].includes(l.etapa)
+const open = (l: Lead) => !['VENTA_CERRADA', 'DESCARTADO', 'RESUELTO', 'EXPIRADO'].includes(l.etapa)
 const sum = (ls: Lead[]) => ls.reduce((t, l) => t + (l.cotizacion?.valor_cop ?? 0), 0)
 const cop = (n: number) => `$${n.toLocaleString('es-CO')} COP`
 
@@ -585,6 +595,7 @@ function card(l: Lead) {
     lead_id: l.id,
     embudo: l.embudo,
     etapa: l.etapa,
+    version: l.version,
     cliente: { nombre: l.nombre, telefono: l.telefono, telefono_verificado: true },
     creado_at: l.creado_at,
   }
@@ -618,6 +629,8 @@ function card(l: Lead) {
   return {
     ...base,
     segmento: l.segmento,
+    numero_guia: l.guia,
+    postventa: l.postventa ?? null,
     cotizacion: {
       codigo: q!.codigo,
       origen: q!.origen,
@@ -642,7 +655,7 @@ function indicators(f: Funnel) {
       },
       {
         etiqueta: 'Ventas cerradas del mes',
-        valor: cop(6900000 + sum(ls.filter((l) => l.etapa === 'cerrada'))),
+        valor: cop(6900000 + sum(ls.filter((l) => l.etapa === 'VENTA_CERRADA'))),
         detalle: '+12% vs. octubre',
         tono: 'success',
       },
@@ -681,7 +694,7 @@ function indicators(f: Funnel) {
     },
     {
       etiqueta: 'Reactivados hoy',
-      valor: String(ls.filter((l) => l.etapa === 'reactivado').length),
+      valor: String(ls.filter((l) => l.etapa === 'REACTIVADO').length),
       detalle: '11% de tasa de reactivación',
       tono: 'success',
     },
@@ -701,10 +714,9 @@ function detail(l: Lead) {
     const isMaria = l.id === 'L-99201'
     const conceptos = isMaria
       ? [
-          { concepto: 'Flete base', valor_cop: 238000 },
+          { concepto: 'Flete base', valor_cop: 271000 },
           { concepto: 'Seguro (0,6% de $8.500.000)', valor_cop: 51000 },
           { concepto: 'Recargo por combustible', valor_cop: 18000 },
-          { concepto: 'Recolección zona industrial', valor_cop: 33000 },
         ]
       : (() => {
           const flete = Math.round((q.valor_cop * 0.82) / 100) * 100
@@ -763,6 +775,8 @@ function detail(l: Lead) {
     lead_id: l.id,
     embudo: l.embudo,
     etapa: l.etapa,
+    version: l.version,
+    postventa: l.postventa ?? null,
     referencia: l.caso?.codigo ?? q?.codigo ?? l.id,
     segmento: l.embudo === 'casos' ? null : l.segmento,
     cliente: { nombre: l.nombre, telefono: l.telefono, correo: l.correo, empresa: l.empresa },
@@ -799,6 +813,12 @@ function defaultTranscript(l: Lead) {
     { rol: 'CLIENTE' as const, texto: l.telefono.replace('+57 ', ''), timestamp: ts(1) },
   ]
 }
+
+const apiError = (status: number, code: string, message: string) =>
+  HttpResponse.json(
+    { error: { code, message, details: null, request_id: crypto.randomUUID() } },
+    { status },
+  )
 
 const notFound = () =>
   HttpResponse.json(
@@ -998,29 +1018,96 @@ export const asesorHandlers: RequestHandler[] = [
   http.patch(api('/asesor/leads/:id'), async ({ params, request }) => {
     const lead = byId(String(params.id))
     if (!lead) return notFound()
-    const { etapa } = (await request.json()) as { etapa: string }
-    let guia: string | null = null
-    if (lead.embudo === 'ventas' && etapa === 'cerrada' && !lead.guia) {
-      // Rango de guías internas del backend (shipment_guide_seq, DEC-SHP1).
-      guia = `TLX-${200000 + Math.floor(Math.random() * 99999)}-CO`
-      lead.guia = guia
-      lead.notas.push(
-        sysNote(`Venta cerrada. Guía ${guia} creada en el TMS.`, new Date().toISOString()),
-      )
-    } else if (lead.etapa === 'cerrada' && etapa !== 'cerrada') {
-      lead.guia = null
+    const { etapa, expected_version, motivo } = (await request.json()) as {
+      etapa: string
+      expected_version: number
+      motivo?: string
+    }
+    if (expected_version !== lead.version) {
+      return apiError(409, 'VERSION_DESACTUALIZADA', 'Otro asesor actualizó este registro.')
+    }
+    if (lead.embudo === 'ventas') {
+      // CR-007: el cierre va por /cerrar (emite guía) y venta cerrada / descartado son finales.
+      if (
+        etapa === 'VENTA_CERRADA' ||
+        lead.etapa === 'VENTA_CERRADA' ||
+        lead.etapa === 'DESCARTADO'
+      ) {
+        return apiError(
+          422,
+          'TRANSICION_NO_PERMITIDA',
+          'Esa etapa no es alcanzable desde la actual.',
+        )
+      }
+      if (etapa === 'DESCARTADO' && !motivo?.trim()) {
+        return apiError(422, 'JUSTIFICACION_REQUERIDA', 'Indica el motivo del descarte.')
+      }
     }
     const name = STAGES[lead.embudo].find((s) => s.id === etapa)?.nombre ?? etapa
-    lead.notas.push(sysNote(`${ADVISOR} movió el lead a «${name}».`, new Date().toISOString()))
+    lead.notas.push(
+      sysNote(
+        `${ADVISOR} movió el lead a «${name}».${motivo ? ` Motivo: ${motivo}` : ''}`,
+        new Date().toISOString(),
+      ),
+    )
     lead.etapa = etapa
-    return HttpResponse.json({ lead_id: lead.id, embudo: lead.embudo, etapa, guia_creada: guia })
+    lead.version += 1
+    return HttpResponse.json({
+      lead_id: lead.id,
+      embudo: lead.embudo,
+      etapa,
+      version: lead.version,
+      guia_creada: null,
+    })
+  }),
+
+  http.post(api('/asesor/leads/:id/cerrar'), async ({ params, request }) => {
+    const lead = byId(String(params.id))
+    if (!lead) return notFound()
+    const { expected_version, destinatario } = (await request.json()) as {
+      expected_version: number
+      destinatario: { nombre: string; telefono: string; direccion: string }
+    }
+    if (expected_version !== lead.version) {
+      return apiError(409, 'VERSION_DESACTUALIZADA', 'Otro asesor actualizó este registro.')
+    }
+    if (lead.embudo !== 'ventas' || ['VENTA_CERRADA', 'DESCARTADO'].includes(lead.etapa)) {
+      return apiError(422, 'TRANSICION_NO_PERMITIDA', 'Esta venta no se puede cerrar.')
+    }
+    if (
+      !destinatario?.nombre?.trim() ||
+      !destinatario.telefono?.trim() ||
+      !destinatario.direccion?.trim()
+    ) {
+      return apiError(422, 'DATOS_INCOMPLETOS', 'Faltan datos del destinatario.')
+    }
+    // Rango de guías internas del backend (shipment_guide_seq, DEC-SHP1).
+    const guia = `TLX-${200000 + Math.floor(Math.random() * 99999)}-CO`
+    lead.guia = guia
+    lead.etapa = 'VENTA_CERRADA'
+    lead.postventa = null
+    lead.version += 1
+    lead.notas.push(
+      sysNote(
+        `Venta cerrada por ${ADVISOR}. Guía ${guia} emitida para ${destinatario.nombre}.`,
+        new Date().toISOString(),
+      ),
+    )
+    return HttpResponse.json({
+      lead_id: lead.id,
+      embudo: lead.embudo,
+      etapa: lead.etapa,
+      version: lead.version,
+      guia_creada: guia,
+    })
   }),
 
   http.post(api('/asesor/leads/:id/tomar-control'), ({ params }) => {
     const lead = byId(String(params.id))
     if (!lead) return notFound()
     lead.embudo = 'ventas'
-    lead.etapa = 'contacto'
+    lead.etapa = 'EN_CONTACTO'
+    lead.version += 1
     lead.creado_at = new Date().toISOString()
     lead.notas.push(
       sysNote(
@@ -1031,7 +1118,8 @@ export const asesorHandlers: RequestHandler[] = [
     return HttpResponse.json({
       lead_id: lead.id,
       embudo: 'ventas',
-      etapa: 'contacto',
+      etapa: 'EN_CONTACTO',
+      version: lead.version,
       guia_creada: null,
     })
   }),

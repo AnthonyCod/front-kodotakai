@@ -133,8 +133,10 @@ export function FunnelBoard({ funnel, selectedLead, onFunnelChange, onOpenLead }
         <MoveStageSheet
           leadId={moving.lead_id}
           current={moving.etapa}
+          version={moving.version}
           stages={stages}
           subtitle={moveSubtitle(moving)}
+          client={moving.cliente}
           onClose={() => setMoving(null)}
         />
       )}

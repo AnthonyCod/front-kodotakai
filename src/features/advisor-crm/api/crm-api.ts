@@ -80,6 +80,8 @@ const routeQuoteSchema = z.object({
 const cardBase = {
   lead_id: z.string(),
   etapa: z.string(),
+  /** Concurrencia optimista: todo cambio envía `expected_version` (409 VERSION_DESACTUALIZADA). */
+  version: z.number(),
   cliente: contactSchema,
   creado_at: isoDate,
 }
@@ -92,6 +94,10 @@ const salesCardSchema = z.object({
     peso_facturable_kg: z.number(),
     tipo_carga: z.string(),
   }),
+  /** Guía emitida al cerrar la venta. */
+  numero_guia: z.string().nullable(),
+  /** Después de "Venta cerrada": se muestra como etiqueta, no como columna. */
+  postventa: z.enum(['ENTREGADO_A_AGENCIA', 'CERRADO']).nullable(),
 })
 export type SalesCard = z.infer<typeof salesCardSchema>
 
@@ -150,13 +156,35 @@ const stageChangeSchema = z.object({
   lead_id: z.string(),
   embudo: funnelIdSchema,
   etapa: z.string(),
-  /** Solo al pasar a "Venta cerrada": guía creada en el TMS. */
+  version: z.number(),
+  /** Solo al cerrar la venta: guía emitida. */
   guia_creada: z.string().nullable(),
 })
 export type StageChange = z.infer<typeof stageChangeSchema>
 
-export const moveLead = (leadId: string, etapa: string) =>
-  httpClient.patch(`/asesor/leads/${encodeURIComponent(leadId)}`, { etapa }, stageChangeSchema)
+export interface StageMove {
+  etapa: string
+  expected_version: number
+  /** Obligatorio al descartar (422 JUSTIFICACION_REQUERIDA). */
+  motivo?: string
+}
+
+export const moveLead = (leadId: string, move: StageMove) =>
+  httpClient.patch(`/asesor/leads/${encodeURIComponent(leadId)}`, move, stageChangeSchema)
+
+export interface Recipient {
+  nombre: string
+  telefono: string
+  direccion: string
+}
+
+/** Cierra la venta: guarda el destinatario y emite la guía. No se puede deshacer. */
+export const closeSale = (leadId: string, expected_version: number, destinatario: Recipient) =>
+  httpClient.post(
+    `/asesor/leads/${encodeURIComponent(leadId)}/cerrar`,
+    { expected_version, destinatario },
+    stageChangeSchema,
+  )
 
 /** Embudo C → A: el asesor toma el lead que perseguía el bot. */
 export const takeOverLead = (leadId: string) =>
@@ -184,6 +212,8 @@ const leadDetailSchema = z.object({
   lead_id: z.string(),
   embudo: funnelIdSchema,
   etapa: z.string(),
+  version: z.number(),
+  postventa: z.enum(['ENTREGADO_A_AGENCIA', 'CERRADO']).nullable(),
   /** Código visible: cotización (`COT-99201`) o caso (`CAS-8921`). */
   referencia: z.string(),
   segmento: z.enum(['B2B', 'B2C']).nullable(),
