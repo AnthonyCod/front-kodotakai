@@ -1,0 +1,26 @@
+{
+  "_nota": "Usuarios de prueba del login simulado (solo MSW, VITE_API_MOCKING=true). No son cuentas reales.",
+  "users": [
+    {
+      "id": "u-usuario",
+      "nombre": "Ana Usuario",
+      "email": "usuario@translogix.test",
+      "rol": "USUARIO",
+      "password": "Logi.Demo-2026"
+    },
+    {
+      "id": "u-encargado",
+      "nombre": "Carlos Encargado",
+      "email": "encargado@translogix.test",
+      "rol": "ENCARGADO",
+      "password": "Logi.Demo-2026"
+    },
+    {
+      "id": "u-admin",
+      "nombre": "Laura Admin",
+      "email": "admin@translogix.test",
+      "rol": "ADMIN",
+      "password": "Logi.Demo-2026"
+    }
+  ]
+}

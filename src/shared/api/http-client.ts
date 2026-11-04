@@ -11,6 +11,7 @@ interface RequestOptions<T> {
   headers?: Record<string, string>
   signal?: AbortSignal
   timeoutMs?: number
+  credentials?: RequestCredentials
 }
 
 export interface CallOptions {
@@ -18,6 +19,8 @@ export interface CallOptions {
   signal?: AbortSignal
   /** Por defecto 20 s. Más para lo que el backend procesa dentro de la petición (lotes). */
   timeoutMs?: number
+  /** `include` en las llamadas con sesión (cookie httpOnly del backend). */
+  credentials?: RequestCredentials
 }
 
 /**
@@ -45,6 +48,7 @@ async function request<T>(path: string, options: RequestOptions<T>): Promise<T> 
         : options.body === undefined
           ? undefined
           : JSON.stringify(options.body),
+      credentials: options.credentials,
       signal,
     })
   } catch (error) {

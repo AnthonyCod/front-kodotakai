@@ -5,6 +5,8 @@ import { Package } from 'lucide-react'
 import { cn } from 'cn'
 import logiUrl from '@/assets/logi.webp'
 import { useChatStore, useSendMessage } from '@/features/chat'
+import { UserMenu } from '@/features/auth'
+import { LiveClock } from '@/shared/ui/live-clock'
 import { GLASS, GLASS_SURFACE } from '@/shared/ui/glass'
 import { PRIMARY_PILL } from '@/shared/ui/page'
 import { Headphones } from '@/shared/components/animate-ui/icons/hugeicons/headphones'
@@ -14,7 +16,6 @@ import { Route } from '@/shared/components/animate-ui/icons/hugeicons/route'
 import { Upload01 } from '@/shared/components/animate-ui/icons/hugeicons/upload-01'
 import { LayoutDashboard } from '@/shared/components/animate-ui/icons/hugeicons/layout-dashboard'
 import { BotMessageSquare } from '@/shared/components/animate-ui/icons/hugeicons/bot-message-square'
-import { MessageCircle } from '@/shared/components/animate-ui/icons/hugeicons/message-circle'
 
 interface Section {
   to: string
@@ -23,7 +24,7 @@ interface Section {
   Icon: ComponentType<{ size?: number; className?: string; 'aria-hidden'?: boolean }>
 }
 
-/** Los 3 módulos del cliente. Asesor y métricas del equipo viven aparte, en `/interno`. */
+/** Los módulos del cliente. */
 const SECTIONS: Section[] = [
   {
     to: '/',
@@ -36,12 +37,6 @@ const SECTIONS: Section[] = [
     label: 'Consultas',
     hint: 'Rastrear, cotizar, PQRS',
     Icon: Package,
-  },
-  {
-    to: '/simulador',
-    label: 'WhatsApp y llamada',
-    hint: 'Simulador de canales',
-    Icon: MessageCircle,
   },
 ]
 
@@ -105,7 +100,7 @@ export function UserLayout() {
           <div
             className={cn(
               GLASS_SURFACE,
-              'mx-auto flex w-full max-w-4xl items-center gap-2 rounded-full p-1.5 pl-2',
+              'mx-auto flex w-full max-w-5xl items-center gap-2 rounded-full p-1.5 pl-2',
             )}
           >
             {/* El logo lleva al inicio (chat con Logi). */}
@@ -142,7 +137,9 @@ export function UserLayout() {
                 </NavLink>
               ))}
             </nav>
-            <div className="ml-auto lg:ml-0">
+            <div className="ml-auto flex shrink-0 items-center gap-2">
+              <LiveClock className="hidden sm:inline-flex" />
+              <UserMenu />
               <AdvisorButton />
             </div>
           </div>

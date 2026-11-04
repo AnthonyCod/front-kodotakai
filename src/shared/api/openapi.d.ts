@@ -175,6 +175,194 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/v1/auth/login': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Login User */
+    post: operations['loginUser']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/auth/me': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Session User */
+    get: operations['getSessionUser']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/auth/logout': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Logout User */
+    post: operations['logoutUser']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/tarifas': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List Tariffs */
+    get: operations['listTariffs']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/tarifas': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List All Tariffs */
+    get: operations['listAllTariffs']
+    put?: never
+    /** Create Tariff */
+    post: operations['createTariff']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/tarifas/{codigo_trayecto}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /** Update Tariff */
+    patch: operations['updateTariff']
+    trace?: never
+  }
+  '/api/v1/cotizaciones/{cotizacion_id}/solicitar': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Request Shipment */
+    post: operations['requestShipment']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/mis-envios': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List My Shipments */
+    get: operations['listMyShipments']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/solicitudes': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List Shipment Requests */
+    get: operations['listShipmentRequests']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/solicitudes/{cotizacion_id}/aprobar': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Approve Shipment Request */
+    post: operations['approveShipmentRequest']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/solicitudes/{cotizacion_id}/rechazar': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Reject Shipment Request */
+    post: operations['rejectShipmentRequest']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/v1/handoffs/{handoff_id}': {
     parameters: {
       query?: never
@@ -736,6 +924,11 @@ export interface components {
       modo: string
     }
     /**
+     * EstadoSolicitud
+     * @enum {string}
+     */
+    EstadoSolicitud: 'PENDIENTE' | 'APROBADA' | 'RECHAZADA'
+    /**
      * EstadoTicket
      * @enum {string}
      */
@@ -1023,6 +1216,25 @@ export interface components {
        */
       estado: 'PRELIMINAR_NO_VINCULANTE'
     }
+    /** LoginRequest */
+    LoginRequest: {
+      /**
+       * Email
+       * @example usuario@translogix.test
+       */
+      email: string
+      /** Password */
+      password: string
+    }
+    /** LogoutResponse */
+    LogoutResponse: {
+      /**
+       * Sesion Cerrada
+       * @default true
+       * @constant
+       */
+      sesion_cerrada: true
+    }
     /**
      * MessageDirection
      * @enum {string}
@@ -1267,6 +1479,11 @@ export interface components {
      * @enum {string}
      */
     RecargoCodigo: 'CADENA_FRIO' | 'MERCANCIA_PELIGROSA'
+    /** RechazoRequest */
+    RechazoRequest: {
+      /** Motivo */
+      motivo: string
+    }
     /** ReindexRequest */
     ReindexRequest: {
       /**
@@ -1336,6 +1553,11 @@ export interface components {
       /** Checklist */
       checklist: components['schemas']['ChecklistItemDetallado'][]
     }
+    /**
+     * Rol
+     * @enum {string}
+     */
+    Rol: 'USUARIO' | 'ENCARGADO' | 'ADMIN'
     /** RutaCotizada */
     RutaCotizada: {
       /** Codigo Trayecto */
@@ -1370,6 +1592,50 @@ export interface components {
        */
       messages: components['schemas']['HistoryEntry'][]
     }
+    /** Solicitante */
+    Solicitante: {
+      /** Nombre */
+      nombre: string
+      /** Email */
+      email: string
+    }
+    /** SolicitudEnvio */
+    SolicitudEnvio: {
+      /**
+       * Cotizacion Id
+       * Format: uuid4
+       */
+      cotizacion_id: string
+      estado: components['schemas']['EstadoSolicitud']
+      /** Origen */
+      origen: string
+      /** Destino */
+      destino: string
+      /** Peso Facturable Kg */
+      peso_facturable_kg: number
+      /**
+       * Flete Total Cop
+       * @description Congelado al cotizar; no cambia si la tarifa cambia.
+       */
+      flete_total_cop: number
+      solicitante: components['schemas']['Solicitante']
+      /**
+       * Solicitado En
+       * Format: date-time
+       */
+      solicitado_en: string
+      /** Revisado En */
+      revisado_en: string | null
+      /** Motivo Rechazo */
+      motivo_rechazo: string | null
+      /** Numero Guia */
+      numero_guia: string | null
+    }
+    /** SolicitudesResponse */
+    SolicitudesResponse: {
+      /** Items */
+      items: components['schemas']['SolicitudEnvio'][]
+    }
     /** TarifaAplicada */
     TarifaAplicada: {
       /**
@@ -1383,6 +1649,175 @@ export interface components {
        */
       cop_por_kg: number
     }
+    /** TarifaRuta */
+    TarifaRuta: {
+      /**
+       * Codigo Trayecto
+       * @example TLX-BOG-MED-001
+       */
+      codigo_trayecto: string
+      /** Origen */
+      origen: string
+      /** Departamento Origen */
+      departamento_origen: string
+      /** Destino */
+      destino: string
+      /** Departamento Destino */
+      departamento_destino: string
+      tipo_cobertura: components['schemas']['TipoCobertura']
+      /**
+       * Tarifa Kg Real Cop
+       * @description Pesos colombianos (COP), entero.
+       */
+      tarifa_kg_real_cop: number
+      /**
+       * Tarifa Kg Volumetrico Cop
+       * @description Pesos colombianos (COP), entero.
+       */
+      tarifa_kg_volumetrico_cop: number
+      /**
+       * Divisor Volumetrico
+       * @description cm³ por kg volumétrico (4000).
+       */
+      divisor_volumetrico: number
+      /**
+       * Flete Minimo Cop
+       * @description Pesos colombianos (COP), entero.
+       */
+      flete_minimo_cop: number
+      /**
+       * Porcentaje Seguro
+       * @description Porcentaje: 1.0 = 1 %.
+       */
+      porcentaje_seguro: number
+      /**
+       * Seguro Minimo Cop
+       * @description Pesos colombianos (COP), entero.
+       */
+      seguro_minimo_cop: number
+      /**
+       * Recargo Cadena Frio Pct
+       * @description Porcentaje: 1.0 = 1 %.
+       */
+      recargo_cadena_frio_pct: number
+      /**
+       * Recargo Mercancia Peligrosa Cop
+       * @description Pesos colombianos (COP), entero.
+       */
+      recargo_mercancia_peligrosa_cop: number
+      /** Tiempo Entrega Horas */
+      tiempo_entrega_horas: number
+      /**
+       * Observaciones
+       * @default
+       */
+      observaciones: string
+      /** Activo */
+      activo: boolean
+      /**
+       * Actualizado En
+       * Format: date-time
+       */
+      actualizado_en: string
+    }
+    /** TarifaRutaCreate */
+    TarifaRutaCreate: {
+      /**
+       * Codigo Trayecto
+       * @example TLX-BOG-MED-001
+       */
+      codigo_trayecto: string
+      /** Origen */
+      origen: string
+      /** Departamento Origen */
+      departamento_origen: string
+      /** Destino */
+      destino: string
+      /** Departamento Destino */
+      departamento_destino: string
+      tipo_cobertura: components['schemas']['TipoCobertura']
+      /**
+       * Tarifa Kg Real Cop
+       * @description Pesos colombianos (COP), entero.
+       */
+      tarifa_kg_real_cop: number
+      /**
+       * Tarifa Kg Volumetrico Cop
+       * @description Pesos colombianos (COP), entero.
+       */
+      tarifa_kg_volumetrico_cop: number
+      /**
+       * Divisor Volumetrico
+       * @description cm³ por kg volumétrico (4000).
+       */
+      divisor_volumetrico: number
+      /**
+       * Flete Minimo Cop
+       * @description Pesos colombianos (COP), entero.
+       */
+      flete_minimo_cop: number
+      /**
+       * Porcentaje Seguro
+       * @description Porcentaje: 1.0 = 1 %.
+       */
+      porcentaje_seguro: number
+      /**
+       * Seguro Minimo Cop
+       * @description Pesos colombianos (COP), entero.
+       */
+      seguro_minimo_cop: number
+      /**
+       * Recargo Cadena Frio Pct
+       * @description Porcentaje: 1.0 = 1 %.
+       */
+      recargo_cadena_frio_pct: number
+      /**
+       * Recargo Mercancia Peligrosa Cop
+       * @description Pesos colombianos (COP), entero.
+       */
+      recargo_mercancia_peligrosa_cop: number
+      /** Tiempo Entrega Horas */
+      tiempo_entrega_horas: number
+      /**
+       * Observaciones
+       * @default
+       */
+      observaciones?: string
+    }
+    /**
+     * TarifaRutaUpdate
+     * @description Only the fields sent change; ``activo=false`` removes the route from quotes.
+     */
+    TarifaRutaUpdate: {
+      tipo_cobertura?: components['schemas']['TipoCobertura'] | null
+      /** Tarifa Kg Real Cop */
+      tarifa_kg_real_cop?: number | null
+      /** Tarifa Kg Volumetrico Cop */
+      tarifa_kg_volumetrico_cop?: number | null
+      /** Divisor Volumetrico */
+      divisor_volumetrico?: number | null
+      /** Flete Minimo Cop */
+      flete_minimo_cop?: number | null
+      /** Porcentaje Seguro */
+      porcentaje_seguro?: number | null
+      /** Seguro Minimo Cop */
+      seguro_minimo_cop?: number | null
+      /** Recargo Cadena Frio Pct */
+      recargo_cadena_frio_pct?: number | null
+      /** Recargo Mercancia Peligrosa Cop */
+      recargo_mercancia_peligrosa_cop?: number | null
+      /** Tiempo Entrega Horas */
+      tiempo_entrega_horas?: number | null
+      /** Observaciones */
+      observaciones?: string | null
+      /** Activo */
+      activo?: boolean | null
+    }
+    /** TarifasResponse */
+    TarifasResponse: {
+      /** Items */
+      items: components['schemas']['TarifaRuta'][]
+    }
     /** TextBlock */
     TextBlock: {
       /**
@@ -1393,6 +1828,11 @@ export interface components {
       /** Text */
       text: string
     }
+    /**
+     * TipoCobertura
+     * @enum {string}
+     */
+    TipoCobertura: 'Urbana Principal' | 'Frontera' | 'Zona ZOMAC' | 'Trayecto Especial'
     /**
      * TipoNovedad
      * @enum {string}
@@ -1459,6 +1899,19 @@ export interface components {
        */
       ultima_temperatura_c: number | null
       fuente: components['schemas']['FuenteConsulta']
+    }
+    /** UsuarioSesion */
+    UsuarioSesion: {
+      /**
+       * Id
+       * Format: uuid4
+       */
+      id: string
+      /** Nombre */
+      nombre: string
+      /** Email */
+      email: string
+      rol: components['schemas']['Rol']
     }
     /** ValidationError */
     ValidationError: {
@@ -2028,6 +2481,335 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['PbxTurnResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  loginUser: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LoginRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['UsuarioSesion']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  getSessionUser: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['UsuarioSesion']
+        }
+      }
+    }
+  }
+  logoutUser: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['LogoutResponse']
+        }
+      }
+    }
+  }
+  listTariffs: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['TarifasResponse']
+        }
+      }
+    }
+  }
+  listAllTariffs: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['TarifasResponse']
+        }
+      }
+    }
+  }
+  createTariff: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['TarifaRutaCreate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['TarifaRuta']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  updateTariff: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        codigo_trayecto: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['TarifaRutaUpdate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['TarifaRuta']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  requestShipment: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        cotizacion_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['SolicitudEnvio']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  listMyShipments: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['SolicitudesResponse']
+        }
+      }
+    }
+  }
+  listShipmentRequests: {
+    parameters: {
+      query?: {
+        estado?: components['schemas']['EstadoSolicitud'] | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['SolicitudesResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  approveShipmentRequest: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        cotizacion_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['SolicitudEnvio']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  rejectShipmentRequest: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        cotizacion_id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RechazoRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['SolicitudEnvio']
         }
       }
       /** @description Validation Error */

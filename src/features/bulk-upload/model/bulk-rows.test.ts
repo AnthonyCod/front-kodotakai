@@ -62,4 +62,10 @@ describe('parseBulkSheet', () => {
       envios: [{ referencia_cliente: 'PED-1001' }],
     })
   })
+
+  it('la referencia sigue el patrón del backend (sin espacios)', () => {
+    const result = parseBulkSheet([HEADER, row({ referencia_cliente: 'PED 1001' })])
+    if (!result.ok) throw new Error(result.error)
+    expect(result.rows[0]?.errors.referencia_cliente).toMatch(/sin espacios/)
+  })
 })

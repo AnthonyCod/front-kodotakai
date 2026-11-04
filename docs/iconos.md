@@ -148,27 +148,6 @@ Nombres verificados en el registro (381 iconos Hugeicons disponibles).
 | Nueva alerta | `bell-ring`       |
 | Notificación | `notification-01` |
 
-### Simulador (`/simulador`, feature `channel-simulator`)
-
-| Uso                           | Icono                                                        |
-| ----------------------------- | ------------------------------------------------------------ |
-| Web Chat                      | `globe-02`                                                   |
-| WhatsApp (simulado)           | `message-circle`                                             |
-| PBX (simulado)                | `phone-call`                                                 |
-| Colgar, voz, papelera, buscar | `PhoneOff`, `Volume2`/`VolumeX`, `Trash2`, `Search` (lucide) |
-| Entrada por voz               | `mic`                                                        |
-
-No se usan logotipos de marcas reales (regla del proyecto), por eso WhatsApp va con `message-circle`.
-
-### Asesor y métricas (`/interno/asesor`, `/interno/metricas`)
-
-| Uso                             | Icono                       |
-| ------------------------------- | --------------------------- |
-| Bandeja de casos                | `users-round`               |
-| Sentimiento negativo / positivo | `thumbs-down` / `thumbs-up` |
-| Métricas                        | `chart-column-increasing`   |
-| Navegación: métricas            | `layout-dashboard`          |
-
 ### Barra lateral (`app/user-layout.tsx`)
 
 | Uso                                   | Icono                                                                              |
@@ -180,6 +159,8 @@ No se usan logotipos de marcas reales (regla del proyecto), por eso WhatsApp va 
 | Administrador                         | `layout-dashboard`                                                                 |
 | Secciones (cabecera y barra inferior) | `route` (Rastrear), `location-01`, `upload-01`, `info`; Logi: `bot-message-square` |
 | Cabecera: hablar con un asesor        | `headphones`                                                                       |
+| Barra inferior móvil                  | `Truck`, `MapPin`, `FileUp`, `Info` (lucide) y logo de Logi al centro        |
+| Reloj de la cabecera                  | `clock-01` (`shared/ui/live-clock.tsx`)                                         |
 
 ### Administrador (`/admin`, feature `business-insights`)
 
@@ -216,8 +197,9 @@ Para esos se usa `lucide-react` (ya instalado, estático):
 | Ciudad sugerida                            | `MapPin` (`Autocomplete`)                                                                                                                               |
 | Centro legal: datos, documento, aviso, FAQ | `ShieldCheck`, `FileText`, `Package`, `ChevronRight`, `ChevronDown`, `ArrowLeft` + `bot-message-square`                                                 |
 | Carga masiva: subir, plantilla, resultado  | `upload-01`, `download-01`, `sparkles` (ilustración); `FileSpreadsheet`, `Braces` (API), `FileDown`, `CircleAlert`, `ChevronDown`, `RefreshCw` (lucide) |
-| Tarifas: entrada, adicionales              | `Calculator`, `Search`, `Snowflake`, `TriangleAlert`, `HandCoins`, `Undo2` (lucide)                                                                     |
+| Tarifas: entrada, adicionales, admin       | `Calculator`, `Search`, `Snowflake`, `TriangleAlert`, `HandCoins`, `Undo2`, `ChevronDown`, `Plus` (lucide)                                     |
 | Sucursales: tarjeta, zoom y buscador       | `arrow-left-01`, `arrow-right-01`, `arrow-down-01`, `plus-sign`, `minus-sign`, `search-01` (`SearchPill`); datos: `MapPin`, `Building2` (lucide)        |
+| Login: ingresar, contraseña, cerrar        | `UserRound`, `Eye`, `EyeOff`, `X`, `LogOut` (lucide)                                                                                            |
 
 Antes de agregar un icono nuevo, buscarlo en el registro (MCP de shadcn o
 `pnpm dlx shadcn@latest search @animate-ui -q <texto>`) y añadirlo a esta tabla.
