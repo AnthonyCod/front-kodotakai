@@ -20,12 +20,12 @@ Abre http://localhost:5173.
 
 ### Variables de entorno
 
-| Variable            | Valor por defecto       | Para qué                                                            |
-| ------------------- | ----------------------- | ------------------------------------------------------------------- |
-| `VITE_API_URL`      | `/api/v1`               | URL base del API (en producción, la URL pública completa)           |
-| `VITE_API_MOCKING`  | `true` en dev           | `true` simula el backend con MSW (`src/mocks`); `false` usa el real |
-| `BACKEND_URL`       | `http://localhost:8000` | Solo dev: a dónde reenvía el proxy de Vite `/api` (no va al bundle) |
-| `VITE_HERE_API_KEY` | (vacío)                 | Mapa de `/sucursales` (HERE Maps JS). Sin ella, imagen fija         |
+| Variable            | Valor por defecto       | Para qué                                                                                                                                   |
+| ------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `VITE_API_URL`      | `/api/v1`               | URL base del API (en producción, la URL pública completa)                                                                                  |
+| `VITE_API_MOCKING`  | `true` en dev           | `true` simula el backend con MSW (`src/mocks`); `false` usa el real; `asesor` simula solo el CRM del asesor (CR-007) y el resto va al real |
+| `BACKEND_URL`       | `http://localhost:8000` | Solo dev: a dónde reenvía el proxy de Vite `/api` (no va al bundle)                                                                        |
+| `VITE_HERE_API_KEY` | (vacío)                 | Mapa de `/sucursales` (HERE Maps JS). Sin ella, imagen fija                                                                                |
 
 ## Scripts
 

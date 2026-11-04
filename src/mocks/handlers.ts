@@ -1,6 +1,8 @@
 import { http, HttpResponse, type RequestHandler } from 'msw'
+import { asesorHandlers, asesorTrackingHandlers } from './asesor-handlers'
 import { chatFixtures, pickScenario } from './scenarios/chat-scenarios'
 import { shipmentBatchHandlers } from './shipment-batches'
+import { resetStaffMocks, staffHandlers } from './staff-handlers'
 import userFixtures from './fixtures/users.json'
 import envioFixtures from './fixtures/envios.json'
 import batchFixtures from './fixtures/shipment-batches.json'
@@ -23,6 +25,12 @@ interface ChatBody {
   client_id: string
   message_id: string
   text?: string | null
+}
+
+/** Tokens personales simulados (formato del backend 1.7.0). Solo MSW; no son credenciales reales. */
+export const MOCK_TOKENS: Record<string, string[]> = {
+  tlxs_mockadmin_demo: ['ADMIN'],
+  tlxs_mockrevisor_demo: ['REVIEWER'],
 }
 
 /** Login simulado: una sola sesión en memoria, como si fuera la cookie del backend. */
@@ -50,6 +58,7 @@ let tariffs: MockTariff[] = []
 /** Para los tests: cada uno empieza sin sesión y con los datos capturados. */
 export function resetMockSession() {
   sessionUserId = null
+  resetStaffMocks()
   requests = structuredClone<MockRequest[]>(envioFixtures.misEnvios.items)
   tariffs = structuredClone(envioFixtures.tarifas.items)
 }
@@ -60,7 +69,8 @@ export function signInMock(rol: string) {
   sessionUserId = userFixtures.users.find((u) => u.rol === rol)?.id ?? null
 }
 
-const RANK = { USUARIO: 0, ENCARGADO: 1, ADMIN: 2 } as const
+// ASESOR es personal interno: no hereda permisos de cliente más allá de USUARIO.
+const RANK = { USUARIO: 0, ASESOR: 0, ENCARGADO: 1, ADMIN: 2 } as const
 
 const publicUser = (id: string | null) => {
   const user = userFixtures.users.find((u) => u.id === id)
@@ -83,19 +93,35 @@ function withRole(rol: keyof typeof RANK) {
 
 const notFound = () => apiError(404, 'NO_ENCONTRADO', 'No encontramos el recurso solicitado.')
 
-
-export const handlers: RequestHandler[] = [
+/** Login simulado. También lo usa `VITE_API_MOCKING=asesor`, porque el backend aún no tiene `/auth`. */
+export const authHandlers: RequestHandler[] = [
   http.post(api('/auth/login'), async ({ request }) => {
     const body = (await request.json()) as { email: string; password: string }
     const user = userFixtures.users.find(
-      (u) => u.email === body.email.trim().toLowerCase() && u.password === body.password,
+      (u) =>
+        u.email === body.email.trim().toLowerCase() &&
+        // Contraseña vacía: cuenta pendiente de contraseña (por ahora no se valida).
+        (u.password === '' || u.password === body.password),
     )
     if (!user) return apiError(401, 'CREDENCIALES_INVALIDAS', 'Correo o contraseña incorrectos.')
     sessionUserId = user.id
     return HttpResponse.json(publicUser(user.id))
   }),
 
-  http.get(api('/auth/me'), () => {
+  http.get(api('/auth/me'), ({ request }) => {
+    const token = request.headers.get('Authorization')?.replace(/^Bearer /, '')
+    if (token) {
+      const roles = MOCK_TOKENS[token]
+      // Un token real (no simulado) sigue al backend: así `VITE_API_MOCKING=asesor` lo valida.
+      if (!roles) return undefined
+      return HttpResponse.json({
+        roles,
+        metodo: 'STAFF_TOKEN',
+        staff_user_id: `staff-${roles[0]!.toLowerCase()}`,
+        client_id: null,
+        scopes: [],
+      })
+    }
     const user = publicUser(sessionUserId)
     return user ? HttpResponse.json(user) : noSession()
   }),
@@ -104,7 +130,10 @@ export const handlers: RequestHandler[] = [
     sessionUserId = null
     return HttpResponse.json({ sesion_cerrada: true })
   }),
+]
 
+export const handlers: RequestHandler[] = [
+  ...authHandlers,
   // Solicitud y aprobación de envíos (CR-003 del backend).
   http.post(api('/cotizaciones/:id/solicitar'), ({ params }) => {
     const { user, error } = withRole('USUARIO')
@@ -279,4 +308,7 @@ export const handlers: RequestHandler[] = [
   }),
 
   ...shipmentBatchHandlers,
+  ...staffHandlers,
+  ...asesorHandlers,
+  ...asesorTrackingHandlers,
 ]

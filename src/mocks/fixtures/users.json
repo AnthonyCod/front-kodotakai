@@ -1,5 +1,5 @@
 {
-  "_nota": "Usuarios de prueba del login simulado (solo MSW, VITE_API_MOCKING=true). No son cuentas reales.",
+  "_nota": "Usuarios de prueba del login simulado (solo MSW). No son cuentas reales. Una contraseña vacía es una cuenta pendiente de contraseña: acepta cualquiera hasta que el backend cree las cuentas.",
   "users": [
     {
       "id": "u-usuario",
@@ -21,6 +21,13 @@
       "email": "admin@translogix.test",
       "rol": "ADMIN",
       "password": "Logi.Demo-2026"
+    },
+    {
+      "id": "u-asesor",
+      "nombre": "Camila Rojas",
+      "email": "asesor@translogix.test",
+      "rol": "ASESOR",
+      "password": ""
     }
   ]
 }

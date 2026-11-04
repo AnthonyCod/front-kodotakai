@@ -7,3 +7,4 @@ export {
 export { trackingCardBlock, TrackingCard } from './components/blocks/tracking-card'
 export { TrackingLookup } from './components/tracking-lookup'
 export { buildTimeline, type TrackingTimeline } from './model/tracking-timeline'
+export { getTracking, type TrackingResponse } from './api/tracking-api'

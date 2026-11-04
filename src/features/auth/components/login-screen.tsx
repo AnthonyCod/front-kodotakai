@@ -1,5 +1,5 @@
 import { Navigate, useNavigate, useSearchParams } from 'react-router'
-import { safeNext } from '../model/roles'
+import { homeFor, safeNext } from '../model/roles'
 import { useSession } from '../model/use-session'
 import { LoginForm } from './login-form'
 
@@ -10,7 +10,7 @@ export function LoginScreen() {
   const { user } = useSession()
   const next = safeNext(params.get('next'))
 
-  if (user) return <Navigate to={next} replace />
+  if (user) return <Navigate to={homeFor(user, next)} replace />
 
   return (
     <div className="mx-auto w-full max-w-sm space-y-6 px-3 py-8 sm:py-14">
@@ -21,7 +21,7 @@ export function LoginScreen() {
         </p>
       </header>
       <div className="rounded-[1.25rem] bg-card p-5 shadow-card">
-        <LoginForm onSuccess={() => void navigate(next, { replace: true })} />
+        <LoginForm onSuccess={(u) => void navigate(homeFor(u, next), { replace: true })} />
       </div>
     </div>
   )

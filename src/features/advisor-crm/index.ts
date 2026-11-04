@@ -1,0 +1,11 @@
+// API pública de la feature advisor-crm (Módulo Asesor). Fuera de la feature solo se importa desde aquí.
+export { funnelIdSchema, type FunnelId } from './api/crm-api'
+export { AdvisorShell } from './components/advisor-shell'
+export { AdvisorDashboard } from './components/dashboard'
+export { FunnelBoard } from './components/funnel-board'
+export { QuickTools } from './components/quick-tools'
+export { MyTasks } from './components/my-tasks'
+export { DangerousGoodsReview } from './components/dangerous-goods'
+export { AdminUsers } from './components/admin-users'
+export { AdminAudit } from './components/admin-audit'
+export { ADVISOR_PATHS, useCaseParam, useLeadParam, useOpenLeadInFunnel } from './model/routes'

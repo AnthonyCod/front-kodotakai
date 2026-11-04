@@ -1,5 +1,13 @@
 import { createBrowserRouter, Navigate } from 'react-router'
+import { AdvisorShell } from '@/features/advisor-crm'
 import { RequireRole } from '@/features/auth'
+import { AdminAuditPage } from '@/pages/admin-audit-page'
+import { AdminUsersPage } from '@/pages/admin-users-page'
+import { AdvisorDangerousGoodsPage } from '@/pages/advisor-dangerous-goods-page'
+import { AdvisorDashboardPage } from '@/pages/advisor-dashboard-page'
+import { AdvisorFunnelPage } from '@/pages/advisor-funnel-page'
+import { AdvisorTasksPage } from '@/pages/advisor-tasks-page'
+import { AdvisorToolsPage } from '@/pages/advisor-tools-page'
 import { AdminInsightsPage } from '@/pages/admin-insights-page'
 import { AdminTariffsPage } from '@/pages/admin-tariffs-page'
 import { MyShipmentsPage } from '@/pages/my-shipments-page'
@@ -51,6 +59,40 @@ export const router = createBrowserRouter([
         element: (
           <RequireRole role="ADMIN">
             <AdminTariffsPage />
+          </RequireRole>
+        ),
+      },
+    ],
+  },
+  {
+    // Módulo Asesor (CRM con 3 embudos) y administración del personal. Rol ASESOR (REVIEWER del
+    // backend) o ADMIN, con token personal. El login con contraseña llega con CR-007.
+    path: '/asesor',
+    element: (
+      <RequireRole role="ASESOR">
+        <AdvisorShell />
+      </RequireRole>
+    ),
+    children: [
+      { index: true, element: <AdvisorDashboardPage /> },
+      { path: 'embudos', element: <Navigate to="ventas" replace /> },
+      { path: 'embudos/:embudo', element: <AdvisorFunnelPage /> },
+      { path: 'consulta', element: <AdvisorToolsPage /> },
+      { path: 'tareas', element: <AdvisorTasksPage /> },
+      { path: 'mercancia-peligrosa', element: <AdvisorDangerousGoodsPage /> },
+      {
+        path: 'admin/usuarios',
+        element: (
+          <RequireRole role="ADMIN">
+            <AdminUsersPage />
+          </RequireRole>
+        ),
+      },
+      {
+        path: 'admin/auditoria',
+        element: (
+          <RequireRole role="ADMIN">
+            <AdminAuditPage />
           </RequireRole>
         ),
       },

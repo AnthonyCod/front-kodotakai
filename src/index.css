@@ -2,6 +2,7 @@
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 @import '@fontsource-variable/geist';
+@import '@fontsource-variable/inter';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -30,6 +31,7 @@
   --color-brand-foreground: var(--brand-foreground);
   --color-success: var(--success);
   --color-warning: var(--warning);
+  --color-warning-strong: var(--warning-strong);
   --color-user-bubble: var(--user-bubble);
   --color-user-bubble-foreground: var(--user-bubble-foreground);
   --shadow-card: var(--card-shadow);
@@ -41,6 +43,8 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+  --color-primary-deep: var(--primary-deep);
+  --color-primary-subtle: var(--primary-subtle);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -66,6 +70,8 @@
   --popover-foreground: oklch(0.145 0 0);
   --primary: #4f46e5;
   --primary-foreground: #ffffff;
+  --primary-deep: #4338ca;
+  --primary-subtle: #eef2ff;
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -75,6 +81,7 @@
   --destructive: #ef4444;
   --success: #10b981;
   --warning: #f59e0b;
+  --warning-strong: #b45309;
   --user-bubble: #eef1f5;
   --user-bubble-foreground: #334155;
   /* Marca Logi: azul del logo y del panel del chat. */
@@ -138,6 +145,25 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+/* Módulo Asesor (CRM): paleta y tipografía propias del diseño de Figma, solo dentro de `.theme-asesor`. */
+.theme-asesor {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --primary: #2563eb;
+  --primary-deep: #1d4ed8;
+  --primary-subtle: #eff6ff;
+  --ring: #2563eb;
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --destructive: #dc2626;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --card-shadow: 0 1px 3px rgb(15 23 42 / 0.06);
+  font-family: 'Inter Variable', sans-serif;
 }
 
 @layer base {

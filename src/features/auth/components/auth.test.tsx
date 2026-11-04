@@ -17,6 +17,14 @@ function renderAt(path: string) {
           </RequireRole>
         ),
       },
+      {
+        path: '/asesor',
+        element: (
+          <RequireRole role="ASESOR">
+            <p>Módulo asesor</p>
+          </RequireRole>
+        ),
+      },
     ],
     { initialEntries: [path] },
   )
@@ -61,5 +69,38 @@ describe('login y roles', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Ingresar' }))
     expect(screen.getByText('Escribe tu correo.')).toBeInTheDocument()
     expect(screen.getByText('Escribe tu contraseña.')).toBeInTheDocument()
+  })
+
+  it('la cuenta de asesor pendiente de contraseña entra con cualquiera y va a su módulo', async () => {
+    renderAt('/login')
+    fill('email', userWith('ASESOR').email)
+    fill('password', 'cualquiera')
+    fireEvent.click(await screen.findByRole('button', { name: 'Ingresar' }))
+    expect(await screen.findByText('Módulo asesor')).toBeInTheDocument()
+  })
+
+  it('un usuario cliente no ve el módulo del asesor', async () => {
+    renderAt('/login?next=%2Fasesor')
+    fill('email', userWith('USUARIO').email)
+    fill('password', userWith('USUARIO').password)
+    fireEvent.click(await screen.findByRole('button', { name: 'Ingresar' }))
+    expect(await screen.findByText(/necesitas el rol Asesor/)).toBeInTheDocument()
+  })
+
+  it('con token del personal entra con el rol que da /auth/me', async () => {
+    renderAt('/login')
+    fill('email', 'revisor.demo@translogix.co')
+    fill('password', 'tlxs_mockrevisor_demo')
+    fireEvent.click(await screen.findByRole('button', { name: 'Ingresar' }))
+    expect(await screen.findByText('Módulo asesor')).toBeInTheDocument()
+  })
+
+  it('un token que el backend no reconoce no da sesión', async () => {
+    renderAt('/login')
+    fill('email', 'alguien@translogix.co')
+    fill('password', 'tlxs_desconocido_xyz')
+    fireEvent.click(await screen.findByRole('button', { name: 'Ingresar' }))
+    expect(await screen.findByRole('alert')).toBeInTheDocument()
+    expect(screen.queryByText('Módulo asesor')).not.toBeInTheDocument()
   })
 })

@@ -5,9 +5,12 @@ import './index.css'
 
 async function enableMocking() {
   // Lectura estática (no `env.apiMocking`) para que Vite elimine MSW del build cuando no se usa.
-  if (import.meta.env.VITE_API_MOCKING !== 'true') return
+  const mode = import.meta.env.VITE_API_MOCKING
+  if (mode !== 'true' && mode !== 'asesor') return
   try {
-    const { worker } = await import('@/mocks/browser')
+    // `asesor`: solo el CRM del asesor simulado (aún no está en el backend); el resto, real.
+    const { worker } =
+      mode === 'asesor' ? await import('@/mocks/asesor-browser') : await import('@/mocks/browser')
     await worker.start({ onUnhandledFrame: 'bypass' })
   } catch (error) {
     // La app debe cargar aunque el navegador no permita service workers.
