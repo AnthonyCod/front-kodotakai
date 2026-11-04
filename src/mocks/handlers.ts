@@ -1,5 +1,6 @@
 import { http, HttpResponse, type RequestHandler } from 'msw'
 import { chatFixtures, pickScenario } from './scenarios/chat-scenarios'
+import { shipmentBatchHandlers } from './shipment-batches'
 import userFixtures from './fixtures/users.json'
 import envioFixtures from './fixtures/envios.json'
 import batchFixtures from './fixtures/shipment-batches.json'
@@ -276,4 +277,6 @@ export const handlers: RequestHandler[] = [
       formula_version: 'provisional-v1',
     })
   }),
+
+  ...shipmentBatchHandlers,
 ]

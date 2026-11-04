@@ -1,11 +1,13 @@
 /**
- * Columnas de la plantilla de carga masiva, en orden. `key` es el campo de `EnvioLoteItem`
- * (`POST /shipment-batches`): los de `CotizacionRequest` más referencia y destinatario.
+ * Columnas de la plantilla de carga masiva, en orden. `key` es el campo del envío en
+ * `POST /shipment-batches` (`destinatario_*` va anidado en `destinatario`). El paquete usa los campos
+ * de `CotizacionRequest`. Documento y email del destinatario (opcionales en el backend) no están
+ * en la plantilla.
  */
 export const BULK_COLUMNS = [
   {
     key: 'referencia_cliente',
-    hint: 'Tu número de pedido, sin espacios. No se puede repetir.',
+    hint: 'Tu número de pedido. Único en el archivo.',
     header: 'Referencia cliente',
     example: 'PED-1001',
     width: 18,
@@ -68,5 +70,5 @@ export const BULK_COLUMNS = [
 
 export type BulkColumnKey = (typeof BULK_COLUMNS)[number]['key']
 
-/** Igual a `BATCH_MAX_ITEMS` por defecto del backend. */
+/** Envíos por archivo: el `BATCH_MAX_ITEMS` por defecto del backend (configurable allá). */
 export const MAX_ROWS = 500

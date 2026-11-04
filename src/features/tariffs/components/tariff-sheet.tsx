@@ -7,6 +7,7 @@ import { formatCop } from '@/shared/lib/format'
 import { normalizeText } from '@/shared/lib/text-match'
 import { ErrorText } from '@/shared/ui/error-text'
 import { FIELD, FIELD_LABEL } from '@/shared/ui/form-styles'
+import { PAGE_TITLE, SURFACE } from '@/shared/ui/page'
 import { fetchTariffs, type TariffRoute } from '../api/tariffs-api'
 import {
   TARIFFS_QUERY_KEY,
@@ -19,7 +20,7 @@ import {
 } from '../model/tariffs'
 
 const SECTION_TITLE = 'text-xs font-medium tracking-wide text-muted-foreground uppercase'
-const CARD = 'rounded-[1.25rem] bg-card p-4 shadow-card sm:p-5'
+const CARD = `${SURFACE} p-4 sm:p-5`
 const CHIP = 'shrink-0 rounded-full bg-muted px-3 py-1 text-xs text-foreground/70'
 
 const EXAMPLE_KG = 10
@@ -38,7 +39,7 @@ export function TariffSheet() {
     .at(-1)
 
   return (
-    <article className="mx-auto w-full max-w-3xl space-y-7 px-3 py-3 sm:space-y-9 sm:px-6 sm:py-6">
+    <article className="mx-auto w-full max-w-3xl space-y-7 px-4 py-3 sm:space-y-9 sm:px-6 sm:py-6">
       <div className="space-y-3">
         <Link
           to="/info"
@@ -46,7 +47,7 @@ export function TariffSheet() {
         >
           <ArrowLeft size={16} aria-hidden /> Información legal
         </Link>
-        <h1 className="text-2xl leading-tight font-medium sm:text-3xl">Tarifas y servicios</h1>
+        <h1 className={PAGE_TITLE}>Tarifas y servicios</h1>
         {updated && (
           <div className="flex flex-wrap gap-2">
             <span className={CHIP}>{routes.length} trayectos</span>

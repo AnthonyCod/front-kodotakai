@@ -25,7 +25,7 @@ export function Metric({
 /** Hueco del resultado antes de consultar. */
 export function EmptyResult({ children }: { children: ReactNode }) {
   return (
-    <div className="grid min-h-40 place-items-center rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">
+    <div className="grid min-h-32 place-items-center rounded-2xl bg-muted/50 p-6 text-center text-sm text-muted-foreground">
       {children}
     </div>
   )

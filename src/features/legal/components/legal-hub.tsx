@@ -1,8 +1,11 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
+import { cn } from 'cn'
 import { Calculator, ChevronDown, ChevronRight, FileText, Package, ShieldCheck } from 'lucide-react'
 import { BotMessageSquare } from '@/shared/components/animate-ui/icons/hugeicons/bot-message-square'
-import { GLASS } from '@/shared/ui/glass'
+import { SECONDARY_PILL, PAGE_SUBTITLE, PAGE_TITLE, SECTION_LABEL, SURFACE } from '@/shared/ui/page'
+import { Badge, BadgeSpinner } from '@/shared/ui/badge'
+import { Reveal } from '@/shared/ui/reveal'
 import { LEGAL_DOCUMENTS, UPCOMING_DOCUMENTS } from '../model/documents'
 import { formatLegalDate } from '../model/format-legal-date'
 
@@ -44,20 +47,18 @@ const FAQS = [
   },
 ]
 
-const SECTION_TITLE = 'text-xs font-medium tracking-wide text-muted-foreground uppercase'
+const SECTION_TITLE = SECTION_LABEL
 
 /** Centro legal (`/info`): resumen, documentos, derechos y preguntas frecuentes. */
 export function LegalHub() {
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-7 px-3 py-3 sm:space-y-9 sm:px-6 sm:py-6">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-medium sm:text-3xl">Información legal</h1>
-        <p className="text-sm text-muted-foreground sm:text-base">
-          Cómo cuidamos tu envío y tus datos.
-        </p>
-      </header>
+    <div className="mx-auto w-full max-w-3xl space-y-7 px-4 py-3 sm:space-y-9 sm:px-6 sm:py-6">
+      <Reveal as="header" className="space-y-1">
+        <h1 className={PAGE_TITLE}>Información legal</h1>
+        <p className={PAGE_SUBTITLE}>Cómo cuidamos tu envío y tus datos.</p>
+      </Reveal>
 
-      <section className="space-y-3">
+      <Reveal as="section" order={1} className="space-y-3">
         <h2 className={SECTION_TITLE}>En resumen</h2>
         <ul className="space-y-3">
           {KEY_POINTS.map(({ icon, text }) => (
@@ -69,32 +70,40 @@ export function LegalHub() {
             </li>
           ))}
         </ul>
-      </section>
+      </Reveal>
 
-      <Link
-        to="/info/tarifas"
-        className="flex items-center gap-3 rounded-[1.25rem] bg-brand-deep p-4 text-brand-foreground shadow-card transition hover:-translate-y-0.5 active:scale-[0.99] sm:p-5"
-      >
-        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-brand-foreground/15">
-          <Calculator size={18} aria-hidden />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block font-medium">Tarifas y servicios</span>
-          <span className="block text-xs text-brand-foreground/80">
-            Cuánto cuesta enviar de ciudad a ciudad y adicionales.
+      <Reveal order={2}>
+        <Link
+          to="/info/tarifas"
+          className={cn(
+            SURFACE,
+            'flex items-center gap-3 p-4 transition hover:bg-muted/40 active:scale-[0.99] sm:p-5',
+          )}
+        >
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand/10 text-brand-deep">
+            <Calculator size={18} aria-hidden />
           </span>
-        </span>
-        <ChevronRight size={18} aria-hidden className="shrink-0" />
-      </Link>
+          <span className="min-w-0 flex-1">
+            <span className="block font-medium">Tarifas y servicios</span>
+            <span className="block text-xs text-muted-foreground">
+              Cuánto cuesta enviar de ciudad a ciudad y adicionales.
+            </span>
+          </span>
+          <ChevronRight size={18} aria-hidden className="shrink-0 text-muted-foreground" />
+        </Link>
+      </Reveal>
 
-      <section className="space-y-3">
+      <Reveal as="section" order={3} className="space-y-3">
         <h2 className={SECTION_TITLE}>Documentos</h2>
         <ul className="grid gap-2 sm:grid-cols-2 sm:gap-3">
           {LEGAL_DOCUMENTS.map((doc) => (
             <li key={doc.slug}>
               <Link
                 to={`/info/${doc.slug}`}
-                className="flex h-full items-center gap-3 rounded-[1.25rem] bg-card p-4 shadow-card transition hover:-translate-y-0.5 active:scale-[0.99]"
+                className={cn(
+                  SURFACE,
+                  'flex h-full items-center gap-3 p-4 transition hover:bg-muted/40 active:scale-[0.99]',
+                )}
               >
                 <span className="grid size-10 shrink-0 place-items-center rounded-full bg-muted text-foreground/70">
                   <FileText size={18} aria-hidden />
@@ -110,38 +119,35 @@ export function LegalHub() {
             </li>
           ))}
           {UPCOMING_DOCUMENTS.map((doc) => (
-            <li
-              key={doc.title}
-              className="flex items-center gap-3 rounded-[1.25rem] border border-dashed p-4"
-            >
+            <li key={doc.title} className="flex items-center gap-3 rounded-2xl bg-muted/60 p-4">
               <span className="grid size-10 shrink-0 place-items-center rounded-full bg-muted text-muted-foreground">
                 <FileText size={18} aria-hidden />
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block font-medium text-muted-foreground">{doc.title}</span>
-                <span className="block text-xs text-muted-foreground">En preparación</span>
               </span>
+              <Badge variant="brand">
+                <BadgeSpinner />
+                En preparación
+              </Badge>
             </li>
           ))}
         </ul>
-      </section>
+      </Reveal>
 
-      <section className="space-y-3 rounded-[1.25rem] bg-muted/70 p-4 sm:p-5">
+      <Reveal as="section" order={4} className="space-y-3 rounded-2xl bg-muted/70 p-4 sm:p-5">
         <h2 className={SECTION_TITLE}>Tus derechos</h2>
         <p className="text-[15px] leading-snug text-foreground/80">
           Puedes conocer, actualizar, corregir o pedir que borremos tus datos.
         </p>
-        <Link
-          to="/consultas?herramienta=pqrs"
-          className={`${GLASS} rounded-full px-4 py-2 text-sm font-medium`}
-        >
+        <Link to="/consultas?herramienta=pqrs" className={SECONDARY_PILL}>
           Hacer una solicitud
         </Link>
-      </section>
+      </Reveal>
 
-      <section className="space-y-3">
+      <Reveal as="section" order={5} className="space-y-3">
         <h2 className={SECTION_TITLE}>Preguntas frecuentes</h2>
-        <div className="divide-y rounded-[1.25rem] bg-card shadow-card">
+        <div className={cn(SURFACE, 'divide-y')}>
           {FAQS.map(({ question, answer }) => (
             <details key={question} className="group px-4">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-3 py-3.5 text-[15px] font-medium [&::-webkit-details-marker]:hidden">
@@ -156,7 +162,7 @@ export function LegalHub() {
             </details>
           ))}
         </div>
-      </section>
+      </Reveal>
 
       <footer className="border-t pt-4 text-xs text-muted-foreground">
         TransLogix · Razón social, NIT y dirección por confirmar.

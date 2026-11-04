@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { CITIES, shipmentFormSchema } from '@/features/quote'
 import { normalizeText, resolveOption } from '@/shared/lib/text-match'
+import type { ShipmentBatchRequest } from '../api/batches-api'
 import { BULK_COLUMNS, MAX_ROWS, type BulkColumnKey } from './bulk-columns'
 
 const text = (missing: string, max: number) =>
@@ -8,9 +9,13 @@ const text = (missing: string, max: number) =>
 
 /** Referencia de pedido y de lote: como `REFERENCE_PATTERN` del backend. */
 export const REFERENCE_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:/#-]{0,63}$/
-const REFERENCE_HINT = 'Solo letras, números y . _ : / # - (sin espacios), máximo 64.'
+export const REFERENCE_HINT = 'Solo letras, números y . _ : / # - (sin espacios), máximo 64.'
 
-/** Una fila = un envío (`EnvioLoteItem`): campos de `/cotizar` + referencia y destinatario. */
+/**
+ * Una fila = un envío del lote (`POST /shipment-batches`): paquete con las reglas de `/cotizar`,
+ * `referencia_cliente` y destinatario (nombre, teléfono y dirección obligatorios). Largos máximos y
+ * formato del teléfono: (por confirmar) con el backend.
+ */
 const bulkRowSchema = shipmentFormSchema.extend({
   referencia_cliente: text('Escribe la referencia del pedido.', 64).regex(
     REFERENCE_PATTERN,
@@ -163,8 +168,11 @@ export const defaultBatchReference = (date = new Date()) =>
 
 export const isValidBatchReference = (value: string) => REFERENCE_PATTERN.test(value.trim())
 
-/** Cuerpo de `POST /shipment-batches`: solo las filas válidas, en orden (`linea` = posición). */
-export function buildBatch(referenciaLote: string, rows: BulkRow[]) {
+/** Filas que van en el lote, en orden: solo las válidas. */
+export const sendableRows = (rows: BulkRow[]) => rows.filter((row) => row.shipment)
+
+/** Cuerpo de `POST /shipment-batches`. `referencia_lote` también va como `Idempotency-Key`. */
+export function buildBatch(referenciaLote: string, rows: BulkRow[]): ShipmentBatchRequest {
   return {
     referencia_lote: referenciaLote.trim(),
     envios: rows.flatMap((row) => (row.shipment ? [row.shipment] : [])),

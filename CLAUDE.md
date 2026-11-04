@@ -33,9 +33,14 @@ Detalle de stack, scripts y estructura: `README.md`.
   mirar el mapeo en `docs/iconos.md`; si se agrega uno nuevo, actualizar esa tabla. Sin versión animada →
   `lucide-react`.
 - Fondo animado: `<InteractiveGradient />` de `@/shared/ui/interactive-gradient` (WebGL2 propio, sin three.js).
-  Ocupa su contenedor (padre `relative` con tamaño). Colores en tokens `--gradient-1..4`. Usarlo en zonas
-  de vitrina: el panel del chat (diseño de Logi, texto blanco con sombra y bloques como tarjetas blancas),
-  simulador o detrás de `LiquidGlassButton`.
+  Ocupa su contenedor (padre `relative` con tamaño). Colores en tokens `--gradient-1..4`. Solo en zonas
+  de vitrina: simulador o detrás de `LiquidGlassButton`. Las pestañas del cliente (chat, Rastrear,
+  Sucursales, Carga masiva, Info) van sin degradados.
+- Estilo de las pestañas: clases de `@/shared/ui/page` (`PAGE_TITLE`, `SURFACE` blanco sin borde con
+  sombra suave, `CARD_DIVIDER` punteado, `PRIMARY_PILL`/`SECONDARY_PILL`/`ICON_PILL` de vidrio en píldora).
+  Estados y etiquetas con `<Badge>` (`@/shared/ui/badge`, variantes de la paleta; `BadgeDot` para «● Lista»,
+  `BadgeSpinner` para «En proceso»). Buscadores con `<SearchPill>` (`@/shared/ui/search-pill`). Cada tarjeta o bloque
+  entra con `<Reveal>` (`@/shared/ui/reveal`, mismo efecto que `SplitText`). Logi: el icono 3D (`src/assets/logi.webp`, el mismo de favicon y PWA).
 - Vidrio: `<Button variant="glass">` (CSS, por defecto). `LiquidGlassButton` (WebGL, pesado) solo en
   1-2 botones de vitrina y con un `background` que refractar.
 
