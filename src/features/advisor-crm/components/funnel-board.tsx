@@ -3,10 +3,12 @@ import { BarChart3 } from 'lucide-react'
 import { cn } from 'cn'
 import { ErrorText } from '@/shared/ui/error-text'
 import type { FunnelCard, FunnelId, FunnelStage } from '../api/crm-api'
-import { FUNNEL_IDS, FUNNELS, STAGE_NOUN } from '../model/funnels'
+import { FUNNELS, STAGE_NOUN } from '../model/funnels'
 import { useNow } from '../model/time'
-import { useAdvisor, useFunnel, useTakeOver } from '../model/use-crm'
+import { useAdvisorName, useFunnel, useTakeOver } from '../model/use-crm'
 import { FunnelCardView } from './funnel-cards'
+import { CasesBoard } from './cases-board'
+import { FunnelSwitch, StageTabs } from './funnel-nav'
 import { MoveStageSheet } from './move-stage-sheet'
 import { Card, CountPill, EmptyStage, SkeletonCard } from './ui'
 import { TONE_TEXT, copLabel } from '../model/tones'
@@ -14,14 +16,31 @@ import { TONE_TEXT, copLabel } from '../model/tones'
 interface BoardProps {
   funnel: FunnelId
   selectedLead: string | null
+  selectedCase: string | null
   onFunnelChange: (id: FunnelId) => void
   onOpenLead: (id: string) => void
+  onOpenCase: (id: string) => void
 }
 
-/** Núcleo del módulo: los 3 embudos. Móvil: pestañas por etapa. Escritorio: Kanban. */
-export function FunnelBoard({ funnel, selectedLead, onFunnelChange, onOpenLead }: BoardProps) {
+/**
+ * Núcleo del módulo: los 3 embudos. Móvil: pestañas por etapa. Escritorio: Kanban. El embudo B
+ * usa la bandeja real `/handoffs`; A y C, el CRM simulado (CR-007 pendiente).
+ */
+export function FunnelBoard(props: BoardProps) {
+  if (props.funnel === 'casos')
+    return (
+      <CasesBoard
+        selectedCase={props.selectedCase}
+        onFunnelChange={props.onFunnelChange}
+        onOpenCase={props.onOpenCase}
+      />
+    )
+  return <CrmFunnelBoard {...props} />
+}
+
+function CrmFunnelBoard({ funnel, selectedLead, onFunnelChange, onOpenLead }: BoardProps) {
   const query = useFunnel(funnel)
-  const advisor = useAdvisor()
+  const advisorName = useAdvisorName()
   const takeOver = useTakeOver()
   const now = useNow(30_000)
   const [stageByFunnel, setStageByFunnel] = useState<Partial<Record<FunnelId, string>>>({})
@@ -36,7 +55,7 @@ export function FunnelBoard({ funnel, selectedLead, onFunnelChange, onOpenLead }
     <FunnelCardView
       key={card.lead_id}
       card={card}
-      advisorName={advisor.data?.nombre ?? ''}
+      advisorName={advisorName}
       now={now}
       selected={selectedLead === card.lead_id}
       onOpen={() => onOpenLead(card.lead_id)}
@@ -174,81 +193,6 @@ function StageCards({
     )
   }
   return <>{cards.map(render)}</>
-}
-
-export function FunnelSwitch({
-  value,
-  onChange,
-}: {
-  value: FunnelId
-  onChange: (id: FunnelId) => void
-}) {
-  return (
-    <div
-      role="tablist"
-      aria-label="Embudo"
-      className="grid grid-cols-3 gap-1 rounded-xl bg-muted p-1"
-    >
-      {FUNNEL_IDS.map((id) => (
-        <button
-          key={id}
-          type="button"
-          role="tab"
-          aria-selected={value === id}
-          onClick={() => onChange(id)}
-          className={cn(
-            'h-9 rounded-lg text-sm transition',
-            value === id ? 'bg-card font-medium text-primary shadow-card' : 'text-muted-foreground',
-          )}
-        >
-          {FUNNELS[id].short}
-        </button>
-      ))}
-    </div>
-  )
-}
-
-function StageTabs({
-  stages,
-  active,
-  loading,
-  onChange,
-}: {
-  stages: FunnelStage[]
-  active: string | undefined
-  loading: boolean
-  onChange: (id: string) => void
-}) {
-  if (loading) return <div className="h-9 w-56 animate-pulse rounded-full bg-muted" />
-  return (
-    <div
-      role="tablist"
-      aria-label="Etapa"
-      className="-mx-4 flex [scrollbar-width:none] gap-2 overflow-x-auto px-4"
-    >
-      {stages.map((stage) => {
-        const selected = stage.id === active
-        return (
-          <button
-            key={stage.id}
-            type="button"
-            role="tab"
-            aria-selected={selected}
-            onClick={() => onChange(stage.id)}
-            className={cn(
-              'flex h-9 shrink-0 items-center gap-2 rounded-full border px-3 text-sm whitespace-nowrap transition',
-              selected
-                ? 'border-primary bg-primary font-medium text-primary-foreground'
-                : 'bg-card text-foreground/80',
-            )}
-          >
-            {stage.nombre}
-            <CountPill active={selected}>{stage.total}</CountPill>
-          </button>
-        )
-      })}
-    </div>
-  )
 }
 
 function StageSummary({ funnel, stage }: { funnel: FunnelId; stage: FunnelStage | undefined }) {

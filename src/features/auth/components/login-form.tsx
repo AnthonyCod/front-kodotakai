@@ -68,6 +68,9 @@ export function LoginForm({ onSuccess }: { onSuccess: (user: SessionUser) => voi
           </button>
         </span>
         <FieldError>{errors.password}</FieldError>
+        <span className="block text-xs text-muted-foreground">
+          Personal y clientes B2B: pega tu token de acceso (tlxs_… o tlx_…).
+        </span>
       </label>
 
       <ErrorText error={mutation.error} />

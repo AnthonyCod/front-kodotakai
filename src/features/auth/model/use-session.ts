@@ -1,5 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { fetchSessionUser, login, logout, type SessionUser } from '../api/auth-api'
+import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
+import { toApiError } from '@/shared/api'
+import { fetchSessionUser, forgetAccess, login, logout, type SessionUser } from '../api/auth-api'
 
 const SESSION_KEY = ['auth', 'session'] as const
 
@@ -29,4 +30,16 @@ export function useLogout() {
     // Aunque el backend falle, en este dispositivo la sesión se cierra.
     onSettled: () => queryClient.setQueryData(SESSION_KEY, null),
   })
+}
+
+/**
+ * Para la caché de consultas: un 401 con token personal significa que venció o fue revocado.
+ * Se olvida el token y la sesión queda vacía, así `RequireRole` manda al login.
+ */
+export function expireSessionOn401(error: unknown, queryClient: QueryClient) {
+  if (toApiError(error).status !== 401) return
+  const user = queryClient.getQueryData<SessionUser | null>(SESSION_KEY)
+  if (!user?.staff_user_id && !user?.roles) return
+  forgetAccess()
+  queryClient.setQueryData(SESSION_KEY, null)
 }

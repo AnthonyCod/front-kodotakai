@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import {
   Bell,
   BookOpen,
@@ -9,6 +9,9 @@ import {
   FileText,
   LayoutGrid,
   ListChecks,
+  FlaskConical,
+  ScrollText,
+  UserCog,
   LogOut,
   ChartColumn,
   Search,
@@ -22,8 +25,10 @@ import { useLogout, useSession } from '@/features/auth'
 import { updateAdvisorStatus, type AdvisorStatus, type FunnelId } from '../api/crm-api'
 import { initials } from '../model/contact'
 import { FUNNELS, FUNNEL_IDS } from '../model/funnels'
-import { ADVISOR_PATHS, useLeadParam } from '../model/routes'
-import { crmKeys, useAdvisor } from '../model/use-crm'
+import { ADVISOR_PATHS, useCaseParam, useLeadParam } from '../model/routes'
+import { useCases } from '../model/use-cases'
+import { CaseDetailPanel } from './case-detail'
+import { crmKeys, useAdvisor, useAdvisorName } from '../model/use-crm'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { LeadDetailPanel } from './lead-detail'
 import { SearchDialog } from './search-dialog'
@@ -38,6 +43,7 @@ const ICON = { strokeWidth: 1.75, 'aria-hidden': true } as const
  */
 export function AdvisorShell() {
   const { leadId, close } = useLeadParam()
+  const caso = useCaseParam()
   const [searchOpen, setSearchOpen] = useState(false)
 
   return (
@@ -53,6 +59,9 @@ export function AdvisorShell() {
         <BottomNav />
       </div>
       {leadId && <LeadDetailPanel key={leadId} leadId={leadId} onClose={close} />}
+      {caso.caseId && (
+        <CaseDetailPanel key={caso.caseId} caseId={caso.caseId} onClose={caso.close} />
+      )}
       {searchOpen && <SearchDialog onClose={() => setSearchOpen(false)} />}
       <ToastViewport />
     </div>
@@ -110,6 +119,7 @@ function StatusSelect({ className, boxed }: { className?: string; boxed?: boolea
 
 function Avatar({ size = 'md' }: { size?: 'md' | 'sm' }) {
   const advisor = useAdvisor()
+  const name = useAdvisorName()
   const available = advisor.data?.estado !== 'OCUPADO'
   return (
     <span
@@ -119,7 +129,7 @@ function Avatar({ size = 'md' }: { size?: 'md' | 'sm' }) {
       )}
       aria-hidden
     >
-      {advisor.data ? initials(advisor.data.nombre) : ''}
+      {name ? initials(name) : ''}
       <span
         className={cn(
           'absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2 border-card',
@@ -226,6 +236,21 @@ function AccountMenu({ up, children }: { up?: boolean; children: ReactNode }) {
               <p className="truncate text-xs text-muted-foreground">{user.email}</p>
             </div>
           )}
+          {/* En móvil no hay barra lateral: las secciones secundarias van aquí. */}
+          <div className="border-y py-1 lg:hidden">
+            {secondaryLinks(user?.rol === 'ADMIN').map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                role="menuitem"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-muted"
+              >
+                <link.Icon className="size-4 text-muted-foreground" {...ICON} />
+                {link.label}
+              </Link>
+            ))}
+          </div>
           <button
             type="button"
             role="menuitem"
@@ -245,14 +270,14 @@ function AccountMenu({ up, children }: { up?: boolean; children: ReactNode }) {
 // --- Móvil ---
 
 function MobileTopBar({ onSearch }: { onSearch: () => void }) {
-  const advisor = useAdvisor()
+  const name = useAdvisorName()
   return (
     <header className="flex h-[60px] shrink-0 items-center gap-3 border-b bg-card px-4 lg:hidden">
       <AccountMenu>
         <Avatar />
       </AccountMenu>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold">{advisor.data?.nombre ?? 'Asesor'}</p>
+        <p className="truncate text-sm font-semibold">{name || 'Asesor'}</p>
         <StatusSelect />
       </div>
       <IconCircle label="Buscar guía, teléfono o cliente" onClick={onSearch}>
@@ -334,6 +359,12 @@ function headerFor(pathname: string) {
     return { title: FUNNELS[funnel].title, subtitle: `${FUNNELS[funnel].subtitle} · Vista Kanban` }
   if (pathname.startsWith(ADVISOR_PATHS.tools))
     return { title: 'Tracking TMS y Base RAG', subtitle: 'Consulta rápida durante la llamada' }
+  if (pathname.startsWith(ADVISOR_PATHS.dangerousGoods))
+    return { title: 'Mercancía peligrosa', subtitle: 'Envíos B2B que esperan revisión' }
+  if (pathname.startsWith(ADVISOR_PATHS.adminUsers))
+    return { title: 'Usuarios internos', subtitle: 'Crear usuarios y cambiar sus roles' }
+  if (pathname.startsWith(ADVISOR_PATHS.adminAudit))
+    return { title: 'Auditoría', subtitle: 'Accesos y cambios registrados por el backend' }
   if (pathname.startsWith(ADVISOR_PATHS.tasks))
     return { title: 'Mis Tareas', subtitle: 'Agenda de llamadas y métricas SLA' }
   return { title: 'Dashboard', subtitle: 'Resumen operativo del turno' }
@@ -362,13 +393,33 @@ function DesktopHeader({ onSearch }: { onSearch: () => void }) {
   )
 }
 
+interface Counts {
+  advisor: ReturnType<typeof useAdvisor>['data']
+  /** Casos reales abiertos (cola + en gestión). */
+  openCases: number | undefined
+}
+
 interface SideItem {
   label: string
   Icon: Icon
   to?: string
-  count?: (a: NonNullable<ReturnType<typeof useAdvisor>['data']>) => number
+  count?: (c: Counts) => number | undefined
   end?: boolean
 }
+
+const DANGEROUS_GOODS: SideItem & { to: string } = {
+  label: 'Mercancía peligrosa',
+  Icon: FlaskConical,
+  to: ADVISOR_PATHS.dangerousGoods,
+}
+
+/** Solo ADMIN (contrato 1.7.0). */
+const ADMIN_ITEMS: (SideItem & { to: string })[] = [
+  { label: 'Usuarios internos', Icon: UserCog, to: ADVISOR_PATHS.adminUsers },
+  { label: 'Auditoría', Icon: ScrollText, to: ADVISOR_PATHS.adminAudit },
+]
+
+const secondaryLinks = (admin: boolean) => [DANGEROUS_GOODS, ...(admin ? ADMIN_ITEMS : [])]
 
 const FUNNEL_ICONS: Record<FunnelId, Icon> = { ventas: Columns3, casos: TriangleAlert, bot: Bot }
 const FUNNEL_NAV: Record<FunnelId, string> = {
@@ -388,7 +439,7 @@ const SIDE_GROUPS: { title: string; items: SideItem[] }[] = [
       label: FUNNEL_NAV[id],
       Icon: FUNNEL_ICONS[id],
       to: ADVISOR_PATHS.funnel(id),
-      count: (a) => a.embudos_abiertos[id],
+      count: (c) => (id === 'casos' ? c.openCases : c.advisor?.embudos_abiertos[id]),
     })),
   },
   {
@@ -397,6 +448,7 @@ const SIDE_GROUPS: { title: string; items: SideItem[] }[] = [
       // Sin diseño todavía: quedan visibles pero deshabilitados.
       { label: 'Directorio de Clientes', Icon: Users },
       { label: 'Tracking TMS', Icon: Truck, to: ADVISOR_PATHS.tools },
+      DANGEROUS_GOODS,
       { label: 'Cotizaciones', Icon: FileText },
       { label: 'Base RAG', Icon: BookOpen, to: `${ADVISOR_PATHS.tools}#rag` },
     ],
@@ -408,7 +460,7 @@ const SIDE_GROUPS: { title: string; items: SideItem[] }[] = [
         label: 'Mis Tareas',
         Icon: ListChecks,
         to: ADVISOR_PATHS.tasks,
-        count: (a) => a.tareas_pendientes,
+        count: (c) => c.advisor?.tareas_pendientes,
       },
       { label: 'Reportes', Icon: ChartColumn },
     ],
@@ -417,6 +469,17 @@ const SIDE_GROUPS: { title: string; items: SideItem[] }[] = [
 
 function Sidebar() {
   const advisor = useAdvisor()
+  const name = useAdvisorName()
+  const { user } = useSession()
+  const cases = useCases()
+  const counts: Counts = {
+    advisor: advisor.data,
+    openCases: cases.data?.items.filter((c) => c.status !== 'CLOSED').length,
+  }
+  const groups =
+    user?.rol === 'ADMIN'
+      ? [...SIDE_GROUPS, { title: 'Administración', items: ADMIN_ITEMS }]
+      : SIDE_GROUPS
   return (
     <aside className="hidden w-[280px] shrink-0 flex-col border-r bg-card lg:flex">
       <div className="flex h-[72px] items-center gap-2.5 px-4">
@@ -429,17 +492,13 @@ function Sidebar() {
         </div>
       </div>
       <nav aria-label="Módulo asesor" className="flex-1 space-y-1 overflow-y-auto px-2">
-        {SIDE_GROUPS.map((group) => (
+        {groups.map((group) => (
           <div key={group.title} className="space-y-0.5">
             <p className="px-2 pt-3 pb-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
               {group.title}
             </p>
             {group.items.map((item) => (
-              <SideLink
-                key={item.label}
-                item={item}
-                count={advisor.data && item.count?.(advisor.data)}
-              />
+              <SideLink key={item.label} item={item} count={item.count?.(counts)} />
             ))}
           </div>
         ))}
@@ -449,7 +508,7 @@ function Sidebar() {
           <Avatar size="sm" />
         </AccountMenu>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold">{advisor.data?.nombre ?? 'Asesor'}</p>
+          <p className="truncate text-sm font-semibold">{name || 'Asesor'}</p>
           <StatusSelect />
         </div>
       </div>

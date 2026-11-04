@@ -1,4 +1,4 @@
-import type { ComponentProps, ReactNode } from 'react'
+import { useState, type ComponentProps, type ReactNode } from 'react'
 import { CircleCheck, CloudOff, Inbox, X } from 'lucide-react'
 import { cn } from 'cn'
 import type { Tone } from '../api/crm-api'
@@ -177,6 +177,44 @@ export function ToastViewport() {
           )}
         </div>
       ))}
+    </div>
+  )
+}
+
+/** Acción que no se puede deshacer: el primer toque pide confirmación. */
+export function ConfirmButton({
+  label,
+  confirmLabel,
+  onConfirm,
+  disabled,
+  className,
+}: {
+  label: ReactNode
+  confirmLabel: string
+  onConfirm: () => void
+  disabled?: boolean
+  className?: string
+}) {
+  const [asking, setAsking] = useState(false)
+  if (!asking)
+    return (
+      <ActionButton className={className} disabled={disabled} onClick={() => setAsking(true)}>
+        {label}
+      </ActionButton>
+    )
+  return (
+    <div className={cn('grid grid-cols-[1fr_auto] gap-2', className)}>
+      <ActionButton
+        variant="primary"
+        disabled={disabled}
+        onClick={() => {
+          setAsking(false)
+          onConfirm()
+        }}
+      >
+        {confirmLabel}
+      </ActionButton>
+      <ActionButton onClick={() => setAsking(false)}>No</ActionButton>
     </div>
   )
 }

@@ -19,9 +19,13 @@ export const hasRole = (user: SessionUser | null | undefined, min: Role) => {
   return RANK[user.rol] >= RANK[min]
 }
 
-/** A dónde va al ingresar sin `?next=`: el asesor entra directo a su módulo. */
+/** A dónde va al ingresar sin `?next=`: el asesor y el personal con token entran a su módulo. */
 export const homeFor = (user: SessionUser, next: string) =>
-  next === '/' && user.rol === 'ASESOR' ? '/asesor' : next
+  next === '/' && (user.rol === 'ASESOR' || user.staff_user_id) ? '/asesor' : next
+
+/** Rol exacto del backend (`ADMIN`, `REVIEWER`, `CLIENT`). Solo existe con token personal. */
+export const hasBackendRole = (user: SessionUser | null | undefined, role: string) =>
+  !!user?.roles?.includes(role)
 
 /** Solo rutas internas de la app (evita redirigir a otro sitio con `?next=`). */
 export const safeNext = (next: string | null) =>

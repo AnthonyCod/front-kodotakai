@@ -569,9 +569,9 @@ const tasks: TaskRow[] = [
   },
   {
     id: 't-5',
-    lead_id: 'C-8890',
-    titulo: 'Validar con Operaciones el caso #CAS-8890',
-    detalle: 'Daño parcial en embalaje · TLX-118493-CO',
+    lead_id: 'L-99172',
+    titulo: 'Llamar a Valentina Ríos',
+    detalle: 'Negociación B2C · Pereira a Bogotá',
     vence_at: inMin(140),
     hecha: false,
   },
@@ -962,15 +962,6 @@ export const asesorHandlers: RequestHandler[] = [
       .filter((t) => !t.hecha)
       .sort((a, b) => a.vence_at.localeCompare(b.vence_at))
     const cases = leads.filter((l) => l.embudo === 'casos' && open(l))
-    const urgentCases = cases
-      .filter((l) => l.caso?.sla_vence_at)
-      .map((l) => ({
-        lead_id: l.id,
-        embudo: 'casos' as const,
-        titulo: `Caso #${l.caso!.codigo} · ${l.caso!.motivo}`,
-        detalle: `${l.guia ?? 'Sin guía'} · Prioridad ${l.caso!.prioridad.toLowerCase()}`,
-        sla_vence_at: l.caso!.sla_vence_at!,
-      }))
     const calls = pending.map((t) => ({
       lead_id: t.lead_id,
       embudo: byId(t.lead_id)!.embudo,
@@ -989,9 +980,8 @@ export const asesorHandlers: RequestHandler[] = [
         sla_cumplimiento_pct: 94,
         sla_meta_pct: 90,
       },
-      acciones: [...calls, ...urgentCases]
-        .sort((a, b) => a.sla_vence_at.localeCompare(b.sla_vence_at))
-        .slice(0, 4),
+      // Los casos escalados salen de la bandeja real /handoffs (no del CRM simulado).
+      acciones: calls.sort((a, b) => a.sla_vence_at.localeCompare(b.sla_vence_at)).slice(0, 4),
     })
   }),
 
@@ -1174,6 +1164,7 @@ export const asesorHandlers: RequestHandler[] = [
     const q = norm(new URL(request.url).searchParams.get('q') ?? '')
     const digits = q.replace(/\D/g, '')
     const resultados = leads
+      .filter((l) => l.embudo !== 'casos')
       .filter((l) => {
         const hay = norm(
           [l.nombre, l.empresa, l.guia, l.cotizacion?.codigo, l.caso?.codigo]

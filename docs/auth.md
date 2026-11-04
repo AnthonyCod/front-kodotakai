@@ -55,3 +55,21 @@ Sin sesión: `401 NO_AUTENTICADO`; rol insuficiente: `403 NO_AUTORIZADO`.
 - `POST /envios/lote` (carga masiva) aún no existe en el backend; el front lo tiene con MSW.
 - `GET /tracking/{guia}` todavía no conoce las guías creadas al aprobar.
 - Reemplazar `X-Admin-Token` por la sesión con rol en los endpoints de asesor y reindexado.
+
+## Token personal (backend 1.7.0, CR-009)
+
+El backend real aún no tiene login con contraseña (llega con CR-007). Mientras tanto:
+
+- En `/login` se escribe el correo y, en **Contraseña**, el token personal (`tlxs_…` del personal,
+  `tlx_…` de un cliente B2B). El front lo valida con `GET /api/v1/auth/me` (`Authorization: Bearer`)
+  y solo entonces lo guarda en `sessionStorage` (se borra al cerrar la pestaña). Nunca va en el repo
+  ni en variables `VITE_`.
+- Roles del backend → front: `ADMIN` → Admin; `REVIEWER` → Asesor; `CLIENT` → Usuario. El personal
+  entra directo a `/asesor`.
+- Un 401 en una ruta protegida (token vencido o revocado) cierra la sesión y vuelve al login.
+- Los tokens de demo los entrega el backend por un canal privado. En MSW hay dos simulados:
+  `tlxs_mockadmin_demo` (ADMIN) y `tlxs_mockrevisor_demo` (REVIEWER).
+
+Pantallas conectadas al backend real: embudo B (`/handoffs`: tomar y cerrar casos), mercancía
+peligrosa (`/internal/dangerous-goods`, decide solo el REVIEWER) y, solo ADMIN, usuarios internos
+(`/internal/staff-users`) y auditoría (`/internal/audit-events`).

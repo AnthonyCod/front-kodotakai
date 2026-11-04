@@ -86,4 +86,21 @@ describe('login y roles', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Ingresar' }))
     expect(await screen.findByText(/necesitas el rol Asesor/)).toBeInTheDocument()
   })
+
+  it('con token del personal entra con el rol que da /auth/me', async () => {
+    renderAt('/login')
+    fill('email', 'revisor.demo@translogix.co')
+    fill('password', 'tlxs_mockrevisor_demo')
+    fireEvent.click(await screen.findByRole('button', { name: 'Ingresar' }))
+    expect(await screen.findByText('Módulo asesor')).toBeInTheDocument()
+  })
+
+  it('un token que el backend no reconoce no da sesión', async () => {
+    renderAt('/login')
+    fill('email', 'alguien@translogix.co')
+    fill('password', 'tlxs_desconocido_xyz')
+    fireEvent.click(await screen.findByRole('button', { name: 'Ingresar' }))
+    expect(await screen.findByRole('alert')).toBeInTheDocument()
+    expect(screen.queryByText('Módulo asesor')).not.toBeInTheDocument()
+  })
 })

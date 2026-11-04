@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useSession } from '@/features/auth'
 import { toApiError } from '@/shared/api'
 import {
   closeSale,
@@ -26,6 +27,13 @@ export const crmKeys = {
 const POLL_MS = 30_000
 
 export const useAdvisor = () => useQuery({ queryKey: crmKeys.advisor, queryFn: getAdvisor })
+
+/** Nombre de quien inició sesión; el del CRM simulado solo como respaldo. */
+export function useAdvisorName() {
+  const { user } = useSession()
+  const advisor = useAdvisor()
+  return user?.nombre ?? advisor.data?.nombre ?? ''
+}
 
 export const useFunnel = (id: FunnelId) =>
   useQuery({ queryKey: crmKeys.funnel(id), queryFn: () => getFunnel(id), refetchInterval: POLL_MS })

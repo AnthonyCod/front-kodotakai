@@ -2,6 +2,7 @@ import { http, HttpResponse, type RequestHandler } from 'msw'
 import { asesorHandlers, asesorTrackingHandlers } from './asesor-handlers'
 import { chatFixtures, pickScenario } from './scenarios/chat-scenarios'
 import { shipmentBatchHandlers } from './shipment-batches'
+import { resetStaffMocks, staffHandlers } from './staff-handlers'
 import userFixtures from './fixtures/users.json'
 import envioFixtures from './fixtures/envios.json'
 import batchFixtures from './fixtures/shipment-batches.json'
@@ -24,6 +25,12 @@ interface ChatBody {
   client_id: string
   message_id: string
   text?: string | null
+}
+
+/** Tokens personales simulados (formato del backend 1.7.0). Solo MSW; no son credenciales reales. */
+export const MOCK_TOKENS: Record<string, string[]> = {
+  tlxs_mockadmin_demo: ['ADMIN'],
+  tlxs_mockrevisor_demo: ['REVIEWER'],
 }
 
 /** Login simulado: una sola sesión en memoria, como si fuera la cookie del backend. */
@@ -51,6 +58,7 @@ let tariffs: MockTariff[] = []
 /** Para los tests: cada uno empieza sin sesión y con los datos capturados. */
 export function resetMockSession() {
   sessionUserId = null
+  resetStaffMocks()
   requests = structuredClone<MockRequest[]>(envioFixtures.misEnvios.items)
   tariffs = structuredClone(envioFixtures.tarifas.items)
 }
@@ -100,7 +108,20 @@ export const authHandlers: RequestHandler[] = [
     return HttpResponse.json(publicUser(user.id))
   }),
 
-  http.get(api('/auth/me'), () => {
+  http.get(api('/auth/me'), ({ request }) => {
+    const token = request.headers.get('Authorization')?.replace(/^Bearer /, '')
+    if (token) {
+      const roles = MOCK_TOKENS[token]
+      // Un token real (no simulado) sigue al backend: así `VITE_API_MOCKING=asesor` lo valida.
+      if (!roles) return undefined
+      return HttpResponse.json({
+        roles,
+        metodo: 'STAFF_TOKEN',
+        staff_user_id: `staff-${roles[0]!.toLowerCase()}`,
+        client_id: null,
+        scopes: [],
+      })
+    }
     const user = publicUser(sessionUserId)
     return user ? HttpResponse.json(user) : noSession()
   }),
@@ -287,6 +308,7 @@ export const handlers: RequestHandler[] = [
   }),
 
   ...shipmentBatchHandlers,
+  ...staffHandlers,
   ...asesorHandlers,
   ...asesorTrackingHandlers,
 ]

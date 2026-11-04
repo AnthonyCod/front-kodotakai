@@ -7,30 +7,45 @@ export const ADVISOR_PATHS = {
   funnel: (id: FunnelId) => `/asesor/embudos/${id}`,
   tools: '/asesor/consulta',
   tasks: '/asesor/tareas',
+  dangerousGoods: '/asesor/mercancia-peligrosa',
+  adminUsers: '/asesor/admin/usuarios',
+  adminAudit: '/asesor/admin/auditoria',
 } as const
 
-/** El detalle se abre encima de la pantalla actual con `?lead=<id>` (inspector en escritorio). */
-export function useLeadParam() {
+/** Detalle encima de la pantalla actual con `?<name>=<id>` (inspector en escritorio). */
+function useDetailParam(name: 'lead' | 'caso') {
   const [params, setParams] = useSearchParams()
-  const leadId = params.get('lead')
+  const id = params.get(name)
 
   const open = useCallback(
-    (id: string) =>
+    (value: string) =>
       setParams((p) => {
-        p.set('lead', id)
+        p.set(name, value)
         return p
       }),
-    [setParams],
+    [setParams, name],
   )
   const close = useCallback(
     () =>
       setParams((p) => {
-        p.delete('lead')
+        p.delete(name)
         return p
       }),
-    [setParams],
+    [setParams, name],
   )
-  return { leadId, open, close }
+  return { id, open, close }
+}
+
+/** Lead del CRM (`?lead=`). */
+export function useLeadParam() {
+  const { id, open, close } = useDetailParam('lead')
+  return { leadId: id, open, close }
+}
+
+/** Caso real de la bandeja `/handoffs` (`?caso=`). */
+export function useCaseParam() {
+  const { id, open, close } = useDetailParam('caso')
+  return { caseId: id, open, close }
 }
 
 /** Abre un lead desde cualquier pantalla (dashboard, tareas, búsqueda) dentro de su embudo. */

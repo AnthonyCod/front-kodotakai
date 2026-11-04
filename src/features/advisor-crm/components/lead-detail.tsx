@@ -16,7 +16,7 @@ import { ErrorText } from '@/shared/ui/error-text'
 import { addNote, getLead, type CallResult, type LeadDetail } from '../api/crm-api'
 import { caseMessage, quoteMessage, telLink, whatsappLink } from '../model/contact'
 import { formatDayTime, formatTime, useNow } from '../model/time'
-import { crmKeys, useAdvisor, useFunnel } from '../model/use-crm'
+import { crmKeys, useAdvisorName, useFunnel } from '../model/use-crm'
 import { isLockedStage, shortStage } from '../model/funnels'
 import { useToasts } from '../model/toast-store'
 import { MoveStageSheet } from './move-stage-sheet'
@@ -121,7 +121,6 @@ function BackButton({ onClose }: { onClose: () => void }) {
 }
 
 function DetailHeader({ lead, onClose }: { lead: LeadDetail; onClose: () => void }) {
-  const advisor = useAdvisor()
   const funnel = useFunnel(lead.embudo)
   const [moving, setMoving] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -129,7 +128,7 @@ function DetailHeader({ lead, onClose }: { lead: LeadDetail; onClose: () => void
   const stageName = stages?.find((s) => s.id === lead.etapa)?.nombre ?? lead.etapa
   // Ventas: venta cerrada y descartado ya no se mueven desde aquí (CR-007).
   const locked = lead.embudo === 'ventas' && isLockedStage(lead.etapa)
-  const advisorName = advisor.data?.nombre ?? ''
+  const advisorName = useAdvisorName()
 
   const message = lead.cotizacion
     ? quoteMessage({

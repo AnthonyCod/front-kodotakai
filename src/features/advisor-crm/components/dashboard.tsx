@@ -5,7 +5,8 @@ import { cn } from 'cn'
 import { ErrorText } from '@/shared/ui/error-text'
 import { getDashboard, type FunnelId } from '../api/crm-api'
 import { formatTime, slaRemaining, useNow } from '../model/time'
-import { crmKeys, useAdvisor } from '../model/use-crm'
+import { crmKeys, useAdvisor, useAdvisorName } from '../model/use-crm'
+import { useCases } from '../model/use-cases'
 import { ActionButton, Card } from './ui'
 import { TONE_TEXT } from '../model/tones'
 
@@ -28,6 +29,7 @@ export function AdvisorDashboard({
   onSeeAll: () => void
 }) {
   const advisor = useAdvisor()
+  const name = useAdvisorName()
   const query = useQuery({
     queryKey: crmKeys.dashboard,
     queryFn: getDashboard,
@@ -35,6 +37,12 @@ export function AdvisorDashboard({
   })
   const now = useNow()
   const kpis = query.data?.kpis
+  // Casos escalados: bandeja real `/handoffs` (cola + en gestión).
+  const cases = useCases()
+  const openCases = cases.data?.items.filter((c) => c.status !== 'CLOSED')
+  const escalated = openCases?.length ?? kpis?.consultas_escaladas ?? 0
+  const highPriority =
+    openCases?.filter((c) => c.prioridad !== 'NORMAL').length ?? kpis?.consultas_prioridad_alta ?? 0
   const today = longDate.format(now)
 
   return (
@@ -42,7 +50,7 @@ export function AdvisorDashboard({
       <header>
         <h1 className="text-xl font-semibold lg:text-2xl">
           {greeting(new Date(now).getHours())}
-          {advisor.data && `, ${advisor.data.nombre.split(' ')[0]}`}
+          {name && `, ${name.split(' ')[0]}`}
         </h1>
         <p className="text-xs text-muted-foreground first-letter:uppercase lg:text-sm">
           {today}
@@ -66,9 +74,9 @@ export function AdvisorDashboard({
               icon={<TriangleAlert {...ICON} />}
               iconTone="danger"
               label="Consultas escaladas"
-              value={kpis.consultas_escaladas}
-              note={`${kpis.consultas_prioridad_alta} de prioridad alta`}
-              tone={kpis.consultas_prioridad_alta > 0 ? 'danger' : 'neutral'}
+              value={escalated}
+              note={`${highPriority} de prioridad alta`}
+              tone={highPriority > 0 ? 'danger' : 'neutral'}
             />
             <Kpi
               icon={<Phone {...ICON} />}
