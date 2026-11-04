@@ -236,14 +236,14 @@ export function ChatView() {
 /** Fila de Logi: avatar a la izquierda y sus bloques (texto plano y tarjetas) a la derecha. */
 function AssistantRow({ children }: { children: ReactNode }) {
   return (
-    <div className="flex items-start gap-3 sm:gap-4">
-      <img src={logiUrl} alt="" className="size-9 shrink-0 rounded-[22%] shadow-card sm:size-11" />
+    <div className="flex items-start gap-2.5 sm:gap-4">
+      <img src={logiUrl} alt="" className="size-8 shrink-0 rounded-[22%] shadow-card sm:size-11" />
       <div className="max-w-full min-w-0 flex-1 space-y-3 sm:max-w-[85%]">{children}</div>
     </div>
   )
 }
 
-const ACTION_BUTTON = `${GLASS_TINT} size-11 shrink-0 rounded-xl sm:size-12 sm:rounded-2xl`
+const ACTION_BUTTON = `${GLASS_TINT} size-10 shrink-0 rounded-xl sm:size-12 sm:rounded-2xl`
 
 function Composer({
   disabled,
@@ -306,7 +306,7 @@ function Composer({
   return (
     <form
       onSubmit={submit}
-      className="relative mt-1 rounded-[1.25rem] bg-card p-3 text-card-foreground shadow-card sm:rounded-[1.75rem] sm:p-4"
+      className="relative mt-1 rounded-[1.25rem] bg-card p-2.5 pl-3.5 text-card-foreground shadow-card sm:rounded-[1.75rem] sm:p-4"
     >
       <label htmlFor="composer" className="sr-only">
         Mensaje para Logi
@@ -314,7 +314,7 @@ function Composer({
       <textarea
         id="composer"
         ref={inputRef}
-        rows={2}
+        rows={1}
         value={text}
         maxLength={MAX_MESSAGE_LENGTH}
         placeholder={
@@ -322,7 +322,7 @@ function Composer({
             ? dictation.interim || 'Te escucho…'
             : (hint ?? '¿Qué paquete movemos hoy? Dime en qué puedo ayudarte')
         }
-        className="block max-h-40 min-h-12 w-full resize-none bg-transparent text-base outline-none placeholder:text-muted-foreground sm:text-lg"
+        className="block [field-sizing:content] max-h-40 min-h-10 w-full resize-none bg-transparent text-base outline-none placeholder:text-muted-foreground sm:min-h-14 sm:text-lg"
         onChange={(event) => setText(event.target.value)}
         onKeyDown={(event) => {
           if (event.key === 'Enter' && !event.shiftKey) submit(event)
@@ -338,7 +338,7 @@ function Composer({
           {uploadError}
         </p>
       )}
-      <div className="mt-2 flex items-center justify-end gap-2 sm:gap-3">
+      <div className="mt-1 flex items-center justify-end gap-2 sm:mt-2 sm:gap-3">
         <input
           ref={fileRef}
           type="file"

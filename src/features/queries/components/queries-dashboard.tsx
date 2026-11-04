@@ -58,16 +58,13 @@ export function QueriesDashboard() {
       <Banner />
 
       {/* Mapa de fondo con las 3 herramientas encima en vidrio. */}
-      <section className="relative flex min-h-[12rem] items-end overflow-hidden rounded-[1.75rem] p-3 shadow-card sm:min-h-[13rem] sm:rounded-[2.25rem] sm:p-5">
+      <section className="relative flex min-h-[8.5rem] items-end overflow-hidden rounded-[1.5rem] p-2 shadow-card sm:min-h-[13rem] sm:rounded-[2.25rem] sm:p-5">
         <img
           src={mapaUrl}
           alt="Mapa de Colombia y la región donde opera TransLogix"
           className="absolute inset-0 size-full object-cover"
         />
-        <div
-          className="relative grid w-full grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-4"
-          role="tablist"
-        >
+        <div className="relative grid w-full grid-cols-3 gap-2 sm:gap-4" role="tablist">
           {TOOLS.map((t) => {
             const selected = t.kind === active
             return (
@@ -77,20 +74,25 @@ export function QueriesDashboard() {
                 role="tab"
                 aria-selected={selected}
                 onClick={() => setActive(t.kind)}
-                className={cn(selected ? GLASS_TINT : GLASS, 'justify-start rounded-2xl text-left')}
+                className={cn(
+                  selected ? GLASS_TINT : GLASS,
+                  'justify-center rounded-2xl text-center sm:justify-start sm:text-left',
+                )}
               >
-                <div className="flex w-full items-center gap-3 px-4 py-3.5">
+                <div className="flex w-full flex-col items-center gap-1.5 px-1 py-2.5 sm:flex-row sm:gap-3 sm:px-4 sm:py-3.5">
                   <span
                     className={cn(
-                      'grid size-10 shrink-0 place-items-center rounded-xl',
+                      'grid size-9 shrink-0 place-items-center rounded-xl sm:size-10',
                       selected ? 'bg-white/15' : 'bg-white/60 text-foreground/70',
                     )}
                   >
                     <t.Icon size={20} aria-hidden />
                   </span>
                   <span className="min-w-0">
-                    <span className="block text-base font-medium sm:text-lg">{t.title}</span>
-                    <span className="block truncate text-xs opacity-70">{t.description}</span>
+                    <span className="block text-sm font-medium sm:text-lg">{t.title}</span>
+                    <span className="hidden truncate text-xs opacity-70 sm:block">
+                      {t.description}
+                    </span>
                   </span>
                 </div>
               </button>
@@ -126,27 +128,29 @@ const GRADIENT_OPTIONS = { resolutionScale: 0.6 }
 
 function Banner() {
   return (
-    <section className="relative flex flex-col gap-4 overflow-hidden rounded-[1.75rem] bg-brand-deep p-4 text-brand-foreground shadow-card sm:flex-row sm:items-center sm:rounded-[2.25rem] sm:p-5">
+    <section className="relative flex items-center gap-3 overflow-hidden rounded-[1.5rem] bg-brand-deep p-3 pl-4 text-brand-foreground shadow-card sm:gap-4 sm:rounded-[2.25rem] sm:p-5">
       {/* Mismo fondo que el panel de la caja de texto del chat: degradado interactivo y viñeta. */}
       <InteractiveGradient options={GRADIENT_OPTIONS} />
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_80%,transparent_10%,var(--brand-deep)_100%)] opacity-90"
       />
-      <span className={`${GLASS_ON_BRAND} relative size-12 shrink-0 rounded-full sm:size-14`}>
+      <span
+        className={`${GLASS_ON_BRAND} relative hidden size-14 shrink-0 rounded-full sm:inline-flex`}
+      >
         <BotMessageSquare size={24} aria-hidden />
       </span>
       <div className="relative min-w-0 flex-1">
-        <p className="text-base font-medium [text-shadow:0_1px_2px_rgb(0_0_0/0.25)] sm:text-lg">
+        <p className="text-[15px] leading-snug font-medium [text-shadow:0_1px_2px_rgb(0_0_0/0.25)] sm:text-lg">
           Consulta tu envío sin esperar
         </p>
-        <p className="text-sm opacity-90 [text-shadow:0_1px_2px_rgb(0_0_0/0.25)]">
+        <p className="hidden text-sm opacity-90 [text-shadow:0_1px_2px_rgb(0_0_0/0.25)] sm:block">
           Rastrea una guía, cotiza o radica una PQRS. Si prefieres conversar, Logi te ayuda.
         </p>
       </div>
       <Link
         to="/"
-        className={`${GLASS_ON_BRAND} relative w-fit shrink-0 rounded-full px-4 py-2.5 text-sm font-medium`}
+        className={`${GLASS_ON_BRAND} relative w-fit shrink-0 rounded-full px-3.5 py-2 text-sm font-medium sm:px-4 sm:py-2.5`}
       >
         Hablar con Logi
       </Link>

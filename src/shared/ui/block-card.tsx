@@ -42,11 +42,11 @@ export function BlockHeader({
 }) {
   return (
     <header className="flex items-center gap-3">
-      <span className="grid size-11 shrink-0 place-items-center rounded-full bg-muted text-foreground/70">
+      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-muted text-foreground/70 sm:size-11">
         {icon}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-base font-medium">{title}</p>
+        <p className="text-base leading-snug font-medium">{title}</p>
         {subtitle && <p className="truncate text-xs text-muted-foreground">{subtitle}</p>}
       </div>
       {aside}
