@@ -1,5 +1,5 @@
 import { http, HttpResponse, type RequestHandler } from 'msw'
-import { asesorHandlers } from './asesor-handlers'
+import { asesorHandlers, asesorTrackingHandlers } from './asesor-handlers'
 import { chatFixtures, pickScenario } from './scenarios/chat-scenarios'
 import userFixtures from './fixtures/users.json'
 import envioFixtures from './fixtures/envios.json'
@@ -82,7 +82,6 @@ function withRole(rol: keyof typeof RANK) {
 }
 
 const notFound = () => apiError(404, 'NO_ENCONTRADO', 'No encontramos el recurso solicitado.')
-
 
 export const handlers: RequestHandler[] = [
   http.post(api('/auth/login'), async ({ request }) => {
@@ -279,4 +278,5 @@ export const handlers: RequestHandler[] = [
   }),
 
   ...asesorHandlers,
+  ...asesorTrackingHandlers,
 ]

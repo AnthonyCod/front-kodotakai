@@ -1115,7 +1115,10 @@ export const asesorHandlers: RequestHandler[] = [
     ).map(({ claves: _claves, ...r }) => r)
     return HttpResponse.json({ resultados })
   }),
+]
 
+/** Tracking de las guías del diseño. Solo con el backend simulado completo (`VITE_API_MOCKING=true`). */
+export const asesorTrackingHandlers: RequestHandler[] = [
   // Si la guía no está aquí, la petición sigue al backend real.
   http.get(api('/tracking/:guia'), ({ params }) => {
     const data = TRACKING[String(params.guia)]
